@@ -1,0 +1,76 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "lucas debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/projeto_intro/main",
+            "args": [
+
+
+                // insira aqui os parametros de entrada
+
+                
+                // func 1
+
+                // "1",
+                // "dados1.csv",
+                // "output_file.bin"
+                
+                // func otimizada
+
+                // "<",
+                // "casos_teste/1.bin"
+
+
+                // func 2
+
+                // "2",
+                // "output_file.bin"
+
+                // func 3
+
+                // "3",
+                // "arquivos_v3/binario7.bin",
+                // "1",
+                // "<",
+                // "input.txt",
+
+                //  fun4
+
+                // "4",
+                // "dados2.bin",
+                // "512"
+                //  fun4
+
+                // "2",
+                // "dados1.bin"
+
+                // func new
+
+                "<",
+                "casos_teste/17.in" 
+
+            ],
+
+
+
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/projeto_intro",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            // "preLaunchTask": "build", 
+            "miDebuggerPath": "/usr/bin/gdb"
+
+        }
+    ]
+}
