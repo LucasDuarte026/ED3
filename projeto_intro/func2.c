@@ -28,7 +28,7 @@ void functionality_2(const char binArchiveName[])
 
     if (cabecalho.status == '0')
     {
-        printf("\nArquivo binário não está consistente.\n");
+        printf("Falha no processamento do arquivo.\n");
         fclose(bin);
         return;
     }

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Exemplo de loop "for" que itera de 1 a 17
+make
 for i in {1..17}
 do
   echo "Iteração $i"
