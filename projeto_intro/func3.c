@@ -139,9 +139,32 @@ void printa_registro(Dados *dados)
     {
         printf("%d", dados->peso);
     }
-    printf("\r\n"); //  Último pulo delinha
+    printf("\n"); //  Último pulo delinha
 }
-
+int testa_campo(char *_nomeCampo, char *_valorCampo, Dados *dados)
+{
+    char *nomeCampo = _nomeCampo;
+    char *valorCampo = _valorCampo;
+    /*
+     *  IF gigante para teste de todas as possibilidades,
+     *  cruzando o nomeCampo e o valorCampo com todas
+     *  as entradas e saídas de uma vez só, economizando código
+     */
+    if ((strcmp(nomeCampo, "nomeTecnologiaOrigem") == 0 && strcmp(valorCampo, dados->nomeTecnologiaOrigem.string) == 0) ||
+        (strcmp(nomeCampo, "nomeTecnologiaDestino") == 0 && strcmp(valorCampo, dados->nomeTecnologiaDestino.string) == 0) ||
+        (strcmp(nomeCampo, "grupo") == 0 && atoi(valorCampo) == dados->grupo) ||
+        (strcmp(nomeCampo, "popularidade") == 0 && atoi(valorCampo) == dados->popularidade) ||
+        (strcmp(nomeCampo, "peso") == 0 && atoi(valorCampo) == dados->peso))
+    {
+        printa_registro(dados); // função que printa o registro inteiro, com ou sem nulos
+        // printf("%s, %d, %d, %s, %d\n",  dados.nomeTecnologiaOrigem.string, dados.grupo, dados.popularidade, dados.nomeTecnologiaDestino.string, dados.peso); // Antiga forma de se printar os campos, sem tratamento de NULOS
+        return 1; //  Caso encontre
+    }
+    else
+    {
+        return 0; //  Caso não encontre
+    }
+}
 void functionality_3(const char binArchiveName[], int n)
 {
     /*
@@ -151,7 +174,7 @@ void functionality_3(const char binArchiveName[], int n)
     FILE *bin = fopen(binArchiveName, "rb");
     if (bin == NULL)
     {
-        printf("\nFalha no processamento do arquivo.\n");
+        printf("Falha no processamento do arquivo.\n");
         return;
     }
 
@@ -163,7 +186,7 @@ void functionality_3(const char binArchiveName[], int n)
     fread(&cabecalho.nroParesTecnologia, sizeof(int), 1, bin);
     if (cabecalho.status == '0')
     {
-        printf("Falha no processamento do arquivo.\r\n");
+        printf("Falha no processamento do arquivo.\n");
         fclose(bin);
         return;
     }
@@ -174,58 +197,86 @@ void functionality_3(const char binArchiveName[], int n)
         char nomeCampo[MAX_STRING_LENGTH];  //  Buffer preparado para pegar a string necessária ao nome do campo de entrada
         char valorCampo[MAX_STRING_LENGTH]; //  Buffer preparado para pegar o valor necessário do campo de entrada
         scanf("%s", nomeCampo);             //  Recebe o nome do campo
-        scan_quote_string(valorCampo);      //  Recebe o valor do campo entre aspas
-
-        int found = 0; //  inicializa a variável de encontrar
-        Dados dados;   //  Inicializa os dados que serão inseridos caso ache
-
-        fseek(bin, 13, SEEK_SET); //  Pula o cabeçalho até o primeiro RRN
-
-        while (fread(&dados.removido, sizeof(char), 1, bin)) //  lê enquanto houver caracter não nulo
+        if (strcmp(nomeCampo, "nomeTecnologiaOrigem") == 0 || strcmp(nomeCampo, "nomeTecnologiaDestino") == 0)
         {
-            if (dados.removido == '0') //  Caso esse caracter lido seja o removido, lê o registro todo a frente elemento por elemento
-            {
-                fread(&dados.grupo, sizeof(int), 1, bin);
-                fread(&dados.popularidade, sizeof(int), 1, bin);
-                fread(&dados.peso, sizeof(int), 1, bin);
-
-                fread(&dados.nomeTecnologiaOrigem.tamanho, sizeof(int), 1, bin);
-                dados.nomeTecnologiaOrigem.string = (char *)malloc(dados.nomeTecnologiaOrigem.tamanho + 1);
-                fread(dados.nomeTecnologiaOrigem.string, sizeof(char), dados.nomeTecnologiaOrigem.tamanho, bin);
-                dados.nomeTecnologiaOrigem.string[dados.nomeTecnologiaOrigem.tamanho] = '\0';
-
-                fread(&dados.nomeTecnologiaDestino.tamanho, sizeof(int), 1, bin);
-                dados.nomeTecnologiaDestino.string = (char *)malloc(dados.nomeTecnologiaDestino.tamanho + 1);
-                fread(dados.nomeTecnologiaDestino.string, sizeof(char), dados.nomeTecnologiaDestino.tamanho, bin);
-                dados.nomeTecnologiaDestino.string[dados.nomeTecnologiaDestino.tamanho] = '\0';
-
-                /*
-                 *  IF gigante para teste de todas as possibilidades,
-                 *  cruzando o nomeCampo e o valorCampo com todas
-                 *  as entradas e saídas de uma vez só, economizando código
-                 */
-
-                if ((strcmp(nomeCampo, "nomeTecnologiaOrigem") == 0 && strcmp(valorCampo, dados.nomeTecnologiaOrigem.string) == 0) ||
-                    (strcmp(nomeCampo, "nomeTecnologiaDestino") == 0 && strcmp(valorCampo, dados.nomeTecnologiaDestino.string) == 0) ||
-                    (strcmp(nomeCampo, "grupo") == 0 && atoi(valorCampo) == dados.grupo) ||
-                    (strcmp(nomeCampo, "popularidade") == 0 && atoi(valorCampo) == dados.popularidade) ||
-                    (strcmp(nomeCampo, "peso") == 0 && atoi(valorCampo) == dados.peso))
-                {
-                    printa_registro(&dados); // função que printa o registro inteiro, com ou sem nulos
-                    // printf("%s, %d, %d, %s, %d\n",  dados.nomeTecnologiaOrigem.string, dados.grupo, dados.popularidade, dados.nomeTecnologiaDestino.string, dados.peso); // Antiga forma de se printar os campos, sem tratamento de NULOS
-                    found = 1; //  Caso encontre
-                }
-
-                free(dados.nomeTecnologiaOrigem.string); //  Libera o campo variável como desejado pelo projeto
-                free(dados.nomeTecnologiaDestino.string);
-            }
+            scan_quote_string(valorCampo); //  Recebe o valor do campo entre aspas
+        }
+        else
+        {
+            scanf("%s", valorCampo); //  Recebe o nome do campo
         }
 
-        if (!found)
+        int registros_encontrados = 0; //  inicializa a variável de encontrar
+        Dados dados;                   //  Inicializa os dados que serão inseridos caso ache
+
+        fseek(bin, TAM_CABECALHO, SEEK_SET); //  Pula o cabeçalho até o primeiro RRN
+        fread(&dados.removido, sizeof(char), 1, bin);
+        if (dados.removido == '0') //  Análogo a função já implmentada
+        {
+            fread(&dados.grupo, sizeof(int), 1, bin);
+            fread(&dados.popularidade, sizeof(int), 1, bin);
+            fread(&dados.peso, sizeof(int), 1, bin);
+
+            fread(&dados.nomeTecnologiaOrigem.tamanho, sizeof(int), 1, bin);
+            dados.nomeTecnologiaOrigem.string = (char *)malloc(dados.nomeTecnologiaOrigem.tamanho + 1);
+            fread(dados.nomeTecnologiaOrigem.string, sizeof(char), dados.nomeTecnologiaOrigem.tamanho, bin);
+            dados.nomeTecnologiaOrigem.string[dados.nomeTecnologiaOrigem.tamanho] = '\0';
+
+            fread(&dados.nomeTecnologiaDestino.tamanho, sizeof(int), 1, bin);
+            dados.nomeTecnologiaDestino.string = (char *)malloc(dados.nomeTecnologiaDestino.tamanho + 1);
+            fread(dados.nomeTecnologiaDestino.string, sizeof(char), dados.nomeTecnologiaDestino.tamanho, bin);
+            dados.nomeTecnologiaDestino.string[dados.nomeTecnologiaDestino.tamanho] = '\0';
+
+            if (testa_campo(nomeCampo, valorCampo, &dados))
+            {
+                registros_encontrados++;
+            }
+            free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
+            free(dados.nomeTecnologiaDestino.string);
+        }
+        while (!feof(bin))
+        {
+            fread(&dados.removido, sizeof(char), 1, bin);
+            if (dados.removido == '0')
+            {
+                fseek(bin, -2, SEEK_CUR); //  retrocede 1 e testa se o anterior era '$'
+                fread(&dados.removido, sizeof(char), 1, bin);
+                if (dados.removido == '$')
+                {
+                    fread(&dados.removido, sizeof(char), 1, bin);
+
+                    fread(&dados.grupo, sizeof(int), 1, bin);
+                    fread(&dados.popularidade, sizeof(int), 1, bin);
+                    fread(&dados.peso, sizeof(int), 1, bin);
+
+                    fread(&dados.nomeTecnologiaOrigem.tamanho, sizeof(int), 1, bin);
+                    dados.nomeTecnologiaOrigem.string = (char *)malloc(dados.nomeTecnologiaOrigem.tamanho + 1);
+                    fread(dados.nomeTecnologiaOrigem.string, sizeof(char), dados.nomeTecnologiaOrigem.tamanho, bin);
+                    dados.nomeTecnologiaOrigem.string[dados.nomeTecnologiaOrigem.tamanho] = '\0';
+
+                    fread(&dados.nomeTecnologiaDestino.tamanho, sizeof(int), 1, bin);
+                    dados.nomeTecnologiaDestino.string = (char *)malloc(dados.nomeTecnologiaDestino.tamanho + 1);
+                    fread(dados.nomeTecnologiaDestino.string, sizeof(char), dados.nomeTecnologiaDestino.tamanho, bin);
+                    dados.nomeTecnologiaDestino.string[dados.nomeTecnologiaDestino.tamanho] = '\0';
+
+                    if (testa_campo(nomeCampo, valorCampo, &dados))
+                    {
+                        registros_encontrados++;
+                    }
+
+                    free(dados.nomeTecnologiaOrigem.string); //  Libera o campo variável como desejado pelo projeto
+                    free(dados.nomeTecnologiaDestino.string);
+                }
+                else
+                {
+                    fseek(bin, 1, SEEK_CUR); //  procede 2 pra pular o lixo de '0 ' no meio do bin
+                }
+            }
+        }
+        if (registros_encontrados == 0)
         {
             printf("Registro inexistente.\n"); // CASO O PEDIDO NÃO ENCONTRE NADA
         }
     }
-
     fclose(bin); //  Fecha o binário devidamente
 }

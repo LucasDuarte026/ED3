@@ -121,16 +121,16 @@ static FILE *init_bin(FILE *bin)
 static void Atualizar_Cabecalho(FILE *bin, char status, int nroTecnologia, int nroParesTecnologia, int prox)
 {
     /*
-        *   Como o próprio nome indica, atualiza os valores depois de devidamente cálculados
-    */
+     *   Como o próprio nome indica, atualiza os valores depois de devidamente cálculados
+     */
     Cabecalho cabecalho;
     cabecalho.status = status;
     cabecalho.proxRRN = prox;
     cabecalho.nroTecnologia = nroTecnologia;
     cabecalho.nroParesTecnologia = nroParesTecnologia;
 
-    fseek(bin, 0, SEEK_SET); // volta para o inicio
-    fwrite(&cabecalho.status, sizeof(char), 1, bin);    //  campo a campo, como foi solicidado
+    fseek(bin, 0, SEEK_SET);                         // volta para o inicio
+    fwrite(&cabecalho.status, sizeof(char), 1, bin); //  campo a campo, como foi solicidado
     fwrite(&cabecalho.proxRRN, sizeof(int), 1, bin);
     fwrite(&cabecalho.nroTecnologia, sizeof(int), 1, bin);
     fwrite(&cabecalho.nroParesTecnologia, sizeof(int), 1, bin);
@@ -139,9 +139,9 @@ static void Atualizar_Cabecalho(FILE *bin, char status, int nroTecnologia, int n
 static void Escrever_Dados(FILE *bin, Dados dados)
 {
     /*
-        * Escreve elemento a elemento com fwrite no arquivo binário
-    */
-    
+     * Escreve elemento a elemento com fwrite no arquivo binário
+     */
+
     fwrite(&dados.removido, sizeof(char), 1, bin);
     fwrite(&dados.grupo, sizeof(int), 1, bin);
     fwrite(&dados.popularidade, sizeof(int), 1, bin);
@@ -156,7 +156,7 @@ static void Escrever_Dados(FILE *bin, Dados dados)
     int tamanhoAtual = sizeof(char) + 3 * sizeof(int) + 2 * sizeof(int) + dados.nomeTecnologiaOrigem.tamanho + dados.nomeTecnologiaDestino.tamanho;
 
     // Calcule a quantidade de lixo
-    int quantidadeLixo = TAM_REGISTRO - tamanhoAtual;   //  Descobre quanto de lixo tem de ser inserido até o fim do registro de 76 bytes
+    int quantidadeLixo = TAM_REGISTRO - tamanhoAtual; //  Descobre quanto de lixo tem de ser inserido até o fim do registro de 76 bytes
 
     // Escreva o lixo no arquivo binário até o fim
     for (int i = 0; i < quantidadeLixo; i++)
@@ -331,26 +331,55 @@ static Dados LerRegistroCSV(FILE *csv)
 static char **testa_unico(int *prt_quant_tec, Dados dado, char **tecnologies)
 {
     int _quant = *prt_quant_tec; //  Passar o ponteiro para uma variável local
-
+    int achouOrigin = 0;         //  Contar caso ache uma origem
+    int achouDestino = 0;        // Contar caso ache um destino
+    // printf("\n");
+    // for (int i = 0; i < *prt_quant_tec; i++)
+    // {
+    //     printf("Elemento %d: %s\n", i + 1, tecnologies[i]);
+    // }
     // Verifica se dado.nomeTecnologiaOrigem.string já existe em tecnologies
     for (int i = 0; i < *prt_quant_tec; i++)
     {
+        if (dado.nomeTecnologiaOrigem.string == "NULO")
+        {
+            achouOrigin = 1;
+        }
+        if (dado.nomeTecnologiaDestino.string == "NULO")
+        {
+            achouDestino = 1;
+        }
         if (strcmp(dado.nomeTecnologiaOrigem.string, tecnologies[i]) == 0) // testa se a tecnologia existe
         {
             // Tecnologia já existe
-            return tecnologies;
+            achouOrigin = 1;
+        }
+        if (strcmp(dado.nomeTecnologiaDestino.string, tecnologies[i]) == 0) // testa se a tecnologia existe
+        {
+            // Tecnologia já existe
+            achouDestino = 1;
+            if (achouDestino && achouOrigin) // economizar poder computacional
+                break;
         }
     }
 
-    _quant++;                                                           //  se não encontrou, soma na quantidade
-    tecnologies = realloc(tecnologies, _quant * sizeof(char *));        //  E adiciona 1 espaço do tamanho de ponteiro de char (string) para tecnologias
-    tecnologies[_quant - 1] = strdup(dado.nomeTecnologiaOrigem.string); //  E armazena tal string na posição correta
+    if (!achouOrigin)
+    {
+        _quant++;                                                           //  se não encontrou, soma na quantidade
+        tecnologies = realloc(tecnologies, _quant * sizeof(char *));        //  E adiciona 1 espaço do tamanho de ponteiro de char (string) para tecnologias
+        tecnologies[_quant - 1] = strdup(dado.nomeTecnologiaOrigem.string); //  E armazena tal string na posição correta
+    }
+    if (!achouDestino)
+    {
 
+        _quant++;                                                            //  se não encontrou, soma na quantidade
+        tecnologies = realloc(tecnologies, _quant * sizeof(char *));         //  E adiciona 1 espaço do tamanho de ponteiro de char (string) para tecnologias
+        tecnologies[_quant - 1] = strdup(dado.nomeTecnologiaDestino.string); //  E armazena tal string na posição correta
+    }
     *prt_quant_tec = _quant; //  devolver ao ponteiro para o valor da variável local
 
     return tecnologies; // E devolve tecnologies devidamente modificado
 }
-
 static char **testa_par(int *prt_quant_tec_par, Dados dado, char **pares)
 {
     int stringConcatMaxSize = strlen(dado.nomeTecnologiaDestino.string) + strlen(dado.nomeTecnologiaOrigem.string) + 1; //  Para se concatenar, achas-se o tamanho total da string concatenada
@@ -402,12 +431,12 @@ short int Functionality_1(const char csvArchiveName[], const char binArchiveName
 
     char headerLine[MAX_STRING_LENGTH];         //  Cria o ponteiro que armazenará a primeira linha completa
     fgets(headerLine, sizeof(headerLine), csv); //  Pular a primeira linha do csv
-
+    int contador = 0;
     while (!feof(csv)) //  Lê o arquivo até seu fim (feof)
     {
-
-        Dados dados;                                               //   Inicializa o dado que será usado para ler e escrever nos arquivos
-        dados = LerRegistroCSV(csv);                               //  Lê o arquivo linha a linha e armazana em dados
+        contador++;
+        Dados dados;                 //   Inicializa o dado que será usado para ler e escrever nos arquivos
+        dados = LerRegistroCSV(csv); //  Lê o arquivo linha a linha e armazana em dados
         Escrever_Dados(bin, dados);                                //  Escreve o dado no arquivo binário
         tecnologies = testa_unico(&quant_tec, dados, tecnologies); //  Função que retorna a quantidade de tecnologia unicas
         pares = testa_par(&duplicade_quant_tec, dados, pares);     //  Função que retorna a quantidade de tecnologia duplicadas em pares
@@ -434,7 +463,11 @@ short int Functionality_1(const char csvArchiveName[], const char binArchiveName
         proxRNN++;
     }
     // printf("\nNumeros de tecnologia:\n\t-> Simples:\t|%d|\n\t-> Duplicado:\t|%d|\n", quant_tec, duplicade_quant_tec); // mostrar os dados para debug
-    Atualizar_Cabecalho(bin, '1', quant_tec, duplicade_quant_tec, proxRNN);                                           //  Atualiza o cabeçalho com as informações finais do binário
+    Atualizar_Cabecalho(bin, '1', quant_tec, duplicade_quant_tec, proxRNN); //  Atualiza o cabeçalho com as informações finais do binário
+    // for (int i = 0; i < quant_tec; i++)
+    // {
+    //     printf("%i -> %s\n", i + 1, tecnologies[i]);
+    // }
 
     fclose(bin); //  Fecha o arquivo binário
     fclose(csv); //  Fecha o arquivo csv
