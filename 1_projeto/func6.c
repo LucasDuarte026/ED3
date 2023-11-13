@@ -23,7 +23,7 @@ void functionality_6(char *dataFileName, char *indexFileName, int n) {
 
         if (strcmp(fieldName, "nomeTecnologiaOrigemDestino") == 0) {
             // Search using B-tree index and functionality 4
-            int RRN = searchBTree(indexFile, fieldValue); // searchBTree should return the RRN
+         // int RRN = searchBTree(indexFile, fieldValue); // searchBTree should return the RRN
             if (RRN != -1) {
                 functionality_4(dataFileName, RRN);
             } else {
