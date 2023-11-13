@@ -380,6 +380,7 @@ static char **testa_unico(int *prt_quant_tec, Dados dado, char **tecnologies)
 
     return tecnologies; // E devolve tecnologies devidamente modificado
 }
+
 static char **testa_par(int *prt_quant_tec_par, Dados dado, char **pares)
 {
     int stringConcatMaxSize = strlen(dado.nomeTecnologiaDestino.string) + strlen(dado.nomeTecnologiaOrigem.string) + 1; //  Para se concatenar, achas-se o tamanho total da string concatenada
@@ -431,24 +432,14 @@ short int Functionality_1(const char csvArchiveName[], const char binArchiveName
 
     char headerLine[MAX_STRING_LENGTH];         //  Cria o ponteiro que armazenará a primeira linha completa
     fgets(headerLine, sizeof(headerLine), csv); //  Pular a primeira linha do csv
-    int contador = 0;
     while (!feof(csv)) //  Lê o arquivo até seu fim (feof)
     {
-        contador++;
         Dados dados;                 //   Inicializa o dado que será usado para ler e escrever nos arquivos
         dados = LerRegistroCSV(csv); //  Lê o arquivo linha a linha e armazana em dados
         Escrever_Dados(bin, dados);                                //  Escreve o dado no arquivo binário
         tecnologies = testa_unico(&quant_tec, dados, tecnologies); //  Função que retorna a quantidade de tecnologia unicas
         pares = testa_par(&duplicade_quant_tec, dados, pares);     //  Função que retorna a quantidade de tecnologia duplicadas em pares
 
-        /*
-        mostrar os dados -> usados para controle
-            for (int i = 0; i < quant_tec; i++){printf("quant_tec:|%d|\ti:%d\t%s\n", quant_tec, i, tecnologies[i]);}
-            for (int i = 0; i < quant_tec; i++)
-            {
-                printf("tec:\t%s", tecnologies[i]);
-            }
-        */
 
         if (!flag_origin) // Uso da flag para só dar free nos elementos variavéis caso eles não sejam nulos (não foram criados)
         {

@@ -6,16 +6,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#define RECORD_SIZE 205
-#define GARBAGE "$"
-#define ORDER 4
-#define MAX_KEYS (ORDER - 1)
-#define MIN_KEYS (ORDER / 2 - 1)
-#define FIELD_SIZE 55
-
-//   -- -- -- --  -- -- -- -- -- -- -- --   -- -- -- --  -- -- -- --
-// Anteriores  - previamente usados anteriormente no projeto introdutório
-
 #define LIXO "$"
 #define TAM_CABECALHO 13
 #define TAM_REGISTRO_FIXO 21
@@ -50,45 +40,5 @@ typedef struct
     StringVariavel nomeTecnologiaDestino; // tamanho variável
 
 } Dados;
-//   -- -- -- --  -- -- -- -- -- -- -- --   -- -- -- --  -- -- -- --
-
-typedef struct
-{
-    char status;
-    int seedNode;
-    int RRNnextNode;
-    char garbage[196];
-} Header;
-
-typedef struct structs
-{
-    int nroChavesNo;
-    int alturaNo;
-    int RRNdoNo;
-} DataTree;
-
-
-
-typedef struct BTreeNode
-{
-    DataTree data;
-    int P1;
-    char *C1[FIELD_SIZE];
-
-    Dados* PR1;
-
-    int P2;
-    char *C2[FIELD_SIZE];
-
-    Dados* PR2;
-
-    int P3;
-    char *C3[FIELD_SIZE];
-    
-    Dados* PR3;
-
-    int P4;
-
-} BTreeNode;
 
 #endif
