@@ -67,33 +67,32 @@ typedef struct structs
     int RRNdoNo;
 } DataTree;
 
+/*  Ordem
+ * P1
+ * C1
+ * PR1
+ * P2
+ * C2
+ * PR2
+ * P3
+ * C3
+ * PR3
+ * P4
+ */
 typedef struct BTreeNode
 {
     DataTree data;
 
-    DataTree *P1;
-    char *C1[FIELD_SIZE];
+    struct BTreeNode *P1;
+    char *C1;
     int PR1;
-    DataTree *P2;
-    char *C2[FIELD_SIZE];
+    struct BTreeNode *P2;
+    char *C2;
     int PR2;
-    DataTree *P3;
-    char *C3[FIELD_SIZE];
+    struct BTreeNode *P3;
+    char *C3;
     int PR3;
-    DataTree *P4;
-
-    /*  Ordem
-     * P1
-     * C1
-     * PR1
-     * P2
-     * C2
-     * PR2
-     * P3
-     * C3
-     * PR3
-     * P4
-     */
+    struct BTreeNode *P4;
 
 } BTreeNode;
 

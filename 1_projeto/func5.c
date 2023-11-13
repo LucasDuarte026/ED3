@@ -21,39 +21,6 @@ static Dados *lerRegistro(FILE *bin, Dados *dados) // Lê o registro completo e 
     return dados;
 }
 
-void insertIndex(BTreeNode *raiz, Dados *dados) // Testa e insere o dado dentro do arquivo de index
-{
-    int stringConcatMaxSize = strlen(dados->nomeTecnologiaDestino.string) + strlen(dados->nomeTecnologiaOrigem.string) + 1; //  Para se concatenar, achas-se o tamanho total da string concatenada
-    char aux[stringConcatMaxSize];                                                                                          //  Cria um auxiliar para guardar tal string concatenada
-
-    strcpy(aux, dados->nomeTecnologiaOrigem.string);  // Copia origem na aux
-    strcat(aux, dados->nomeTecnologiaDestino.string); // Concatena com destino
-    printf("concatenado: %s\n", aux);
-    /*
-    if (heightTree(raiz) == 1)
-    {
-        //  é nó raiz, inserir já nele
-    }
-    else
-    {
-        switch (isAvailable(raiz))
-        {
-        case 1:
-
-            break;
-        case 2:
-            break;
-        case 3:
-            break;
-        case 0:
-            // insertIndex(raiz,&dados)/
-            break;
-        default:
-            break;
-        }
-    }
-    */
-}
 void functionality_5(char *binArchiveName, char *outArchiveName)
 {
     /*
@@ -61,7 +28,7 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
      *   Abre o arquivo binário, lê o cabeçario para posicionar devidamente a cabeça leitora para o primeiro RRN
      */
     FILE *bin = fopen(binArchiveName, "rb");        // Abre o arquivo bin de registro
-    FILE *bin_index = fopen(binArchiveName, "wb+"); // criar o bin para colocar os index
+    FILE *bin_index = fopen(outArchiveName, "wb+"); // criar o bin para colocar os index
 
     if (bin == NULL || bin_index == NULL)
     {
@@ -97,8 +64,8 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
     {
         dados = *lerRegistro(bin, &dados);
 
-        printa_registro(&dados);   //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
-        // insertIndex(root, &dados); // Testa e insere o dado dentro do arquivo de index
+        // printa_registro(&dados);   //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
+        insertIndex(root, &dados); // Testa e insere o dado dentro do arquivo de index
 
         free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
         free(dados.nomeTecnologiaDestino.string);
@@ -117,8 +84,8 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
 
                 encontrado = 1;
 
-                printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
-                // insertIndex(root, &dados);
+                // printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
+                insertIndex(root, &dados);
                 free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
                 free(dados.nomeTecnologiaDestino.string);
             }
