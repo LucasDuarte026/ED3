@@ -435,7 +435,7 @@ short int Functionality_1(const char csvArchiveName[], const char binArchiveName
     while (!feof(csv)) //  Lê o arquivo até seu fim (feof)
     {
         contador++;
-        Dados* dados;                 //   Inicializa o dado que será usado para ler e escrever nos arquivos
+        Dados dados;                 //   Inicializa o dado que será usado para ler e escrever nos arquivos
         dados = LerRegistroCSV(csv); //  Lê o arquivo linha a linha e armazana em dados
         Escrever_Dados(bin, dados);                                //  Escreve o dado no arquivo binário
         tecnologies = testa_unico(&quant_tec, dados, tecnologies); //  Função que retorna a quantidade de tecnologia unicas
