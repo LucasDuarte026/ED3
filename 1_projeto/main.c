@@ -5,7 +5,7 @@
 
 int main()
 {
-    
+
     //  -- - -- -- - -- -- - -- -- - -- -- - -- -- - -- -- - -- -- - -- -- - --
 
     /*  Sintaxe muito parecida com a main do projeto introdutório
@@ -41,9 +41,41 @@ int main()
         // scanf("%s", argumento_3);
         // binRegName = argumento_2;
         // binArchiveName = argumento_3;
-        binRegName = "dados1.bin";  // inserção manual do nome dos arquivos para debug
+        binRegName = "dados1.bin";     // inserção manual do nome dos arquivos para debug
         binArchiveName = "output.bin"; // inserção manual do nome dos arquivos para debug
-        functionality_5(binRegName, binArchiveName);
+                                       // functionality_5(binRegName, binArchiveName);
+
+        char *a = "D";
+        char *b = "C";
+        char *c = "B";
+        char *d = "A";
+        char *e = "U";
+        char *f = "L";
+        char *g = "H";
+        char *h = "I";
+
+        // char *a = "A";
+        // char *b = "Z";
+        // char *c = "W";
+        // char *d = "U";
+        // char *e = "V";
+        // char *f = "C";
+        // char *g = "I";
+        // char *h = "F";
+        // Dados dados;
+
+        BTreeNode *root;
+        root = initNode(root);
+        insertIndexString(root, a);
+        insertIndexString(root, b);
+        insertIndexString(root, c);
+        insertIndexString(root, d);
+        insertIndexString(root, e);
+        insertIndexString(root, f);
+        insertIndexString(root, g);
+        insertIndexString(root, h);
+
+        break;
     case '6':
     case '7':
     case '8':

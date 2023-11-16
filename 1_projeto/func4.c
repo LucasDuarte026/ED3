@@ -41,7 +41,7 @@ void functionality_4(const char binArchiveName[], const int RRN)
     FILE *bin = fopen(binArchiveName, "rb");   
     if (bin == NULL)
     {
-        printf("Registro inexistente.\n");
+        printf("Falha no processamento do arquivo.\n");
         return;
     }
 

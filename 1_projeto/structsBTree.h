@@ -68,16 +68,16 @@ typedef struct structs
 } DataTree;
 
 /*  Ordem
- * P1
+ * P1 -> Ponteiro para antes do c1
  * C1
  * PR1
- * P2
+ * P2 -> Ponteiro para antes do c2 e depois de c1
  * C2
  * PR2
- * P3
+ * P3 -> Ponteiro para antes do c3 e depois de c2
  * C3
  * PR3
- * P4
+ * P4 -> Ponteiro para depois do c3
  */
 typedef struct BTreeNode
 {

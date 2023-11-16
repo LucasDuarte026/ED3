@@ -37,7 +37,7 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
     }
 
     BTreeNode *root;
-    root = createRoot(root);
+    root = initNode(root);
 
     //  inicializa o cabeçalho
     Cabecalho cabecalho;
