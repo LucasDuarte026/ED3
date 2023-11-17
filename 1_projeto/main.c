@@ -65,15 +65,16 @@ int main()
         // Dados dados;
 
         BTreeNode *root;
-        root= initNode();
-        insertIndexString(&root, a);
-        insertIndexString(&root, b);
-        insertIndexString(&root, c);
-        insertIndexString(&root, d);
-        insertIndexString(&root, e);
-        insertIndexString(&root, f);
-        insertIndexString(&root, g);
-        insertIndexString(&root, h);
+        root = initNode();
+        int highestTree = 0;
+        insertIndexString(&root, a, &highestTree);
+        insertIndexString(&root, b, &highestTree);
+        insertIndexString(&root, c, &highestTree);
+        insertIndexString(&root, d, &highestTree);
+        insertIndexString(&root, e, &highestTree);
+        insertIndexString(&root, f, &highestTree);
+        insertIndexString(&root, g, &highestTree);
+        insertIndexString(&root, h, &highestTree);
 
         break;
     case '6':

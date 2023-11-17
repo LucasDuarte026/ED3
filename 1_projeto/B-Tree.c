@@ -28,31 +28,49 @@ BTreeNode *initNode()
 int heightTree(BTreeNode *root)
 {
 
-    int height = 1;
+    int height = 0;
     if (root == NULL)
     {
-        return 1;
+        return 0;
     }
     else
     {
         if (root->P1 != NULL)
         {
-            height += heightTree(root->P1);
+            int chilhdHeight = heightTree(root->P1);
+            if (chilhdHeight > height)
+            {
+                height = chilhdHeight;
+            }
         }
         if (root->P2 != NULL)
         {
-            height += heightTree(root->P2);
+            int chilhdHeight = heightTree(root->P2);
+            if (chilhdHeight > height)
+            {
+                height = chilhdHeight;
+            }
         }
+
         if (root->P3 != NULL)
         {
-            height += heightTree(root->P3);
+            int chilhdHeight = heightTree(root->P3);
+            if (chilhdHeight > height)
+            {
+                height = chilhdHeight;
+            }
         }
+
         if (root->P4 != NULL)
         {
-            height += heightTree(root->P4);
+            int chilhdHeight = heightTree(root->P4);
+            if (chilhdHeight > height)
+            {
+                height = chilhdHeight;
+            }
         }
     }
-    return height;
+    return height + 1;
 }
 
 static int isAvailable(char *text)
@@ -160,6 +178,9 @@ static char **shiftRightImplement(BTreeNode *node, char *aux, int place, char **
             elements[1] = node->C1;
             elements[0] = strdup(aux);
 
+            node->P4=node->P3;  // Reajuste de ponteiros em caso de split
+            node->P3=node->P2;
+
             node->C3 = NULL;
             node->C2 = NULL;
 
@@ -206,11 +227,33 @@ static char **shiftRightImplement(BTreeNode *node, char *aux, int place, char **
     return NULL;
 }
 
-/* Testa e insere o dado dentro do arquivo de index */
-char **insertIndexString(BTreeNode **root, char *aux)
+int isRoot(BTreeNode *root, int highestTree)
 {
-    char **promoted = malloc(4 * sizeof(char *));
+    int local_height = heightTree(root);
+    if (local_height == 0)
+    {
+        printf("É nó folha\n");
+        return 0;
+    }
+    else if (highestTree == local_height)
+    {
+        printf("é Raiz\n");
+        return 1;
+    }
 
+    else
+    {
+        printf("é nó intermediario\n");
+        return 0;
+    }
+}
+/* Testa e insere o dado dentro do arquivo de index */
+char **insertIndexString(BTreeNode **root, char *aux, int *highestTree)
+{
+    if (*highestTree < heightTree((*root)))
+        *highestTree = heightTree((*root));
+
+    char **promoted = malloc(4 * sizeof(char *));
     if ((*root)->C1 == NULL)
     {
         insertInPlace(*root, aux, 1);
@@ -225,17 +268,12 @@ char **insertIndexString(BTreeNode **root, char *aux)
     {
         if (isNode((*root)->P1))
         {
-            if (promoted = insertIndexString(&(*root)->P1, aux))
+            if (promoted = insertIndexString(&(*root)->P1, aux, highestTree))
             {
-                BTreeNode *newRoot;
-                newRoot = initNode();
 
                 BTreeNode *newRight = splitNode(*root, promoted);
-                newRoot->P1 = *root;
-                newRoot->P2 = newRight;
                 newRight->C1 = promoted[2];
                 newRight->C2 = promoted[3];
-                *root = newRoot;
 
                 return shiftRightImplement(*root, aux, 1, promoted);
             }
@@ -244,7 +282,7 @@ char **insertIndexString(BTreeNode **root, char *aux)
         {
             if (promoted = shiftRightImplement(*root, aux, 1, promoted))
             {
-                if (heightTree(*root) == 1)
+                if (isRoot((*root), (*highestTree)))
                 {
                     BTreeNode *newRoot;
                     newRoot = initNode();
@@ -259,15 +297,9 @@ char **insertIndexString(BTreeNode **root, char *aux)
                 }
                 else
                 {
-                    BTreeNode *newRoot;
-                    newRoot = initNode();
-
                     BTreeNode *newRight = splitNode(*root, promoted);
-                    newRoot->P1 = *root;
-                    newRoot->P2 = newRight;
                     newRight->C1 = promoted[2];
                     newRight->C2 = promoted[3];
-                    *root = newRoot;
 
                     return promoted;
                 }
