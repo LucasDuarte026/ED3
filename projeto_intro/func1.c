@@ -87,7 +87,7 @@ static void binarioNaTela(const char *nomeArquivoBinario)
         return;
     }
     fseek(fs, 0, SEEK_END);
-    fl = ftell(fs);
+    fl = ftell(fs);Conforme visto na funcionalidade [2], na linguagem SQL o comando SELECT é
     fseek(fs, 0, SEEK_SET);
     mb = (unsigned char *)malloc(fl);
     fread(mb, 1, fl, fs);
