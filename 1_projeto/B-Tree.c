@@ -6,7 +6,7 @@
 #include "B-Tree.h"
 
 /*  Inicializa a raiz   */
-BTreeNode *initNode(BTreeNode *raiz)
+BTreeNode *initNode()
 {
     BTreeNode *newNode = (BTreeNode *)malloc(sizeof(BTreeNode));
     newNode->C1 = NULL;
@@ -76,7 +76,7 @@ int isNode(BTreeNode *node)
 static BTreeNode *splitNode(BTreeNode *root, char **auxOrdered)
 {
     BTreeNode *newRight;
-    newRight = initNode(newRight);
+    newRight = initNode();
 
     newRight->C1 = strdup(auxOrdered[2]);
     newRight->C2 = strdup(auxOrdered[3]);
@@ -207,99 +207,100 @@ static char **shiftRightImplement(BTreeNode *node, char *aux, int place, char **
 }
 
 /* Testa e insere o dado dentro do arquivo de index */
-char **insertIndexString(BTreeNode *root, char *aux)
+char **insertIndexString(BTreeNode **root, char *aux)
 {
-    //  Primeira inserção da arvore
-    char **promoted = malloc(4 * sizeof(char *)); // alocar mem[oria para os elementos]
-    if (root->C1 == NULL)
-    {
-        insertInPlace(root, aux, 1);
-    }
+    char **promoted = malloc(4 * sizeof(char *));
 
-    // Teste para caso seja igual a algo já inserido
-    else if (stringHigherThen(aux, root->C1, 0) == 0 || stringHigherThen(aux, root->C2, 0) == 0 || stringHigherThen(aux, root->C3, 0) == 0)
+    if ((*root)->C1 == NULL)
+    {
+        insertInPlace(*root, aux, 1);
+    }
+    else if (stringHigherThen(aux, (*root)->C1, 0) == 0 ||
+             stringHigherThen(aux, (*root)->C2, 0) == 0 ||
+             stringHigherThen(aux, (*root)->C3, 0) == 0)
     {
         printf("aux: %s não armazenado, eh igual um dos indices\n", aux);
     }
-
-    else if (stringHigherThen(aux, root->C1, 0) == 1)
+    else if (stringHigherThen(aux, (*root)->C1, 0) == 1)
     {
-        if (isNode(root->P1))
+        if (isNode((*root)->P1))
         {
-            if (promoted = insertIndexString(root->P1, aux)) // Implementa
+            if (promoted = insertIndexString(&(*root)->P1, aux))
             {
                 BTreeNode *newRoot;
-                newRoot = initNode(newRoot);
+                newRoot = initNode();
 
-                BTreeNode *newRight = splitNode(root, promoted);
-                newRoot->P1 = root;
+                BTreeNode *newRight = splitNode(*root, promoted);
+                newRoot->P1 = *root;
                 newRoot->P2 = newRight;
                 newRight->C1 = promoted[2];
                 newRight->C2 = promoted[3];
-                root = newRoot;
-                return shiftRightImplement(root, aux, 1, promoted);
+                *root = newRoot;
+
+                return shiftRightImplement(*root, aux, 1, promoted);
             }
         }
         else
         {
-            if (promoted = shiftRightImplement(root, aux, 1, promoted)) // Simplemente coloca o valor no local
+            if (promoted = shiftRightImplement(*root, aux, 1, promoted))
             {
-                if (heightTree(root) == 1)
+                if (heightTree(*root) == 1)
                 {
                     BTreeNode *newRoot;
-                    newRoot = initNode(newRoot);
+                    newRoot = initNode();
 
-                    BTreeNode *newRight = splitNode(root, promoted);
-                    newRoot->P1 = root;
+                    BTreeNode *newRight = splitNode(*root, promoted);
+                    newRoot->P1 = *root;
                     newRoot->P2 = newRight;
                     newRoot->C1 = promoted[1];
                     newRight->C1 = promoted[2];
                     newRight->C2 = promoted[3];
-                    root = newRoot;
+                    *root = newRoot;
                 }
-                else{
-
+                else
+                {
                     BTreeNode *newRoot;
-                    newRoot = initNode(newRoot);
+                    newRoot = initNode();
 
-                    BTreeNode *newRight = splitNode(root, promoted);
-                    newRoot->P1 = root;
+                    BTreeNode *newRight = splitNode(*root, promoted);
+                    newRoot->P1 = *root;
                     newRoot->P2 = newRight;
                     newRight->C1 = promoted[2];
                     newRight->C2 = promoted[3];
-                    root = newRoot;
+                    *root = newRoot;
+
                     return promoted;
                 }
             }
         }
     }
 
-    else if (stringHigherThen(aux, root->C1, 0) == 2 && stringHigherThen(aux, root->C2, 0) == 1)
-    {
-        if (root->P2 == NULL) // ou seja, n tem filho
-        {
-            // troca c1 para c2 e c2 para c3 e armazena aux em c1;
-            shiftRightImplement(root, aux, 2, promoted);
-        }
-    }
+    // else if (stringHigherThen(aux, root->C1, 0) == 2 && stringHigherThen(aux, root->C2, 0) == 1)
+    // {
+    //     if (root->P2 == NULL) // ou seja, n tem filho
+    //     {
+    //         // troca c1 para c2 e c2 para c3 e armazena aux em c1;
+    //         shiftRightImplement(root, aux, 2, promoted);
+    //     }
+    // }
 
-    else if (stringHigherThen(aux, root->C2, 0) == 2 && stringHigherThen(aux, root->C3, 0) == 1)
-    {
-        if (root->P3 == NULL) // ou seja, n tem filho
-        {
-            // troca c1 para c2 e c2 para c3 e armazena aux em c1;
-            shiftRightImplement(root, aux, 3, promoted);
-        }
-    }
+    // else if (stringHigherThen(aux, root->C2, 0) == 2 && stringHigherThen(aux, root->C3, 0) == 1)
+    // {
+    //     if (root->P3 == NULL) // ou seja, n tem filho
+    //     {
+    //         // troca c1 para c2 e c2 para c3 e armazena aux em c1;
+    //         shiftRightImplement(root, aux, 3, promoted);
+    //     }
+    // }
 
-    else if (stringHigherThen(aux, root->C3, 0) == 2)
-    {
-        if (root->P4 == NULL) // ou seja, n tem filho
-        {
-            // troca c1 para c2 e c2 para c3 e armazena aux em c1;
-            // shiftRightImplement(root, aux, 3,promoted);
-        }
-    }
+    // else if (stringHigherThen(aux, root->C3, 0) == 2)
+    // {
+    //     if (root->P4 == NULL) // ou seja, n tem filho
+    //     {
+    //         // troca c1 para c2 e c2 para c3 e armazena aux em c1;
+    //         // shiftRightImplement(root, aux, 3,promoted);
+    //     }
+    // }
 }
 
 void insertIndex(BTreeNode *root, Dados *dados)

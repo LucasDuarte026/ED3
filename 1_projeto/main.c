@@ -45,14 +45,14 @@ int main()
         binArchiveName = "output.bin"; // inserção manual do nome dos arquivos para debug
                                        // functionality_5(binRegName, binArchiveName);
 
-        char *a = "D";
-        char *b = "C";
-        char *c = "B";
-        char *d = "A";
-        char *e = "U";
-        char *f = "L";
-        char *g = "H";
-        char *h = "I";
+        char *a = "H";
+        char *b = "G";
+        char *c = "F";
+        char *d = "E";
+        char *e = "D";
+        char *f = "C";
+        char *g = "B";
+        char *h = "A";
 
         // char *a = "A";
         // char *b = "Z";
@@ -65,15 +65,15 @@ int main()
         // Dados dados;
 
         BTreeNode *root;
-        root = initNode(root);
-        insertIndexString(root, a);
-        insertIndexString(root, b);
-        insertIndexString(root, c);
-        insertIndexString(root, d);
-        insertIndexString(root, e);
-        insertIndexString(root, f);
-        insertIndexString(root, g);
-        insertIndexString(root, h);
+        root= initNode();
+        insertIndexString(&root, a);
+        insertIndexString(&root, b);
+        insertIndexString(&root, c);
+        insertIndexString(&root, d);
+        insertIndexString(&root, e);
+        insertIndexString(&root, f);
+        insertIndexString(&root, g);
+        insertIndexString(&root, h);
 
         break;
     case '6':

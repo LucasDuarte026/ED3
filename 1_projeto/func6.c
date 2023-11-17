@@ -3,7 +3,7 @@
 #include "func3.h"
 #include "func4.h" // Include functionality 4
 
-
+/*
 void functionality_6(char *dataFileName, char *indexFileName, int n) {
     FILE *dataFile = fopen(dataFileName, "rb");
     FILE *indexFile = fopen(indexFileName, "rb");
@@ -38,4 +38,4 @@ void functionality_6(char *dataFileName, char *indexFileName, int n) {
     fclose(dataFile);
     fclose(indexFile);
 }
-
+*/
