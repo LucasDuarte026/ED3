@@ -45,14 +45,28 @@ int main()
         binArchiveName = "output.bin"; // inserção manual do nome dos arquivos para debug
                                        // functionality_5(binRegName, binArchiveName);
 
-        char *a = "H";
-        char *b = "G";
-        char *c = "F";
-        char *d = "E";
-        char *e = "D";
-        char *f = "C";
-        char *g = "B";
-        char *h = "A";
+
+        // teste para p1
+        // char *a = "H";
+        // char *b = "G";
+        // char *c = "F";
+        // char *d = "E";
+        // char *e = "D";
+        // char *f = "C";
+        // char *g = "B";
+        // char *h = "A";
+
+// teste para p4
+        char *a = "A";
+        char *b = "B";
+        char *c = "C";
+        char *d = "D";
+        char *e = "E";
+        char *f = "F";
+        char *g = "G";
+        char *h = "H";
+        char *i = "I";
+        char *j = "J";
 
         // char *a = "A";
         // char *b = "Z";
@@ -75,6 +89,8 @@ int main()
         insertIndexString(&root, f, &highestTree);
         insertIndexString(&root, g, &highestTree);
         insertIndexString(&root, h, &highestTree);
+        insertIndexString(&root, i, &highestTree);
+        insertIndexString(&root, j, &highestTree);
 
         break;
     case '6':

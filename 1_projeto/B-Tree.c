@@ -168,6 +168,34 @@ static void shiftRightImplement(BTreeNode *node, char *aux, int place)
     case 3:
         node->C3 = strdup(aux);
         break;
+    case 4:
+        node->C1 = strdup(aux);
+        break;
+    default:
+        break;
+    }
+}
+
+static void shiftPointers(BTreeNode *node, BTreeNode *newRight, int place)
+{
+    switch (place)
+    {
+    case 1:
+
+        node->P4 = node->P3;
+        node->P3 = node->P2;
+        node->P2 = newRight;
+        break;
+    case 2:
+        node->P4 = node->P3;
+        node->P3 = newRight;
+        break;
+    case 3:
+        node->P4 = newRight;
+        break;
+    case 4:
+        printf("Vê o que vai rolar\n");
+        break;
     default:
         break;
     }
@@ -198,40 +226,42 @@ static void splitNode(BTreeNode *dadNode, BTreeNode *childNode, BTreeNode *newRi
         vector[1] = strdup(childNode->C1);
         vector[2] = strdup(childNode->C2);
         vector[3] = strdup(childNode->C3);
-        dadNode->P4 = dadNode->P3;
-        dadNode->P3 = dadNode->P2;
-        dadNode->P2 = newRight;
+
+        shiftPointers(dadNode, newRight, where);
         break;
     case 2:
         vector[0] = strdup(childNode->C1);
         vector[1] = strdup(aux);
         vector[2] = strdup(childNode->C2);
         vector[3] = strdup(childNode->C3);
-        dadNode->P4 = dadNode->P3;
-        dadNode->P3 = newRight;
+
+        shiftPointers(dadNode, newRight, where);
         break;
     case 3:
         vector[0] = strdup(childNode->C1);
         vector[1] = strdup(childNode->C2);
         vector[2] = strdup(aux);
         vector[3] = strdup(childNode->C3);
-        dadNode->P4 = newRight;
+
+        shiftPointers(dadNode, newRight, where);
         break;
     case 4:
         vector[0] = strdup(childNode->C1);
         vector[1] = strdup(childNode->C2);
         vector[2] = strdup(childNode->C3);
         vector[3] = strdup(aux);
-        printf("\nagora fudeu");
+
+        int shifPlace = whereToInsert(dadNode, aux);
+        shiftPointers(dadNode, newRight, shifPlace);
         break;
 
     default:
-        printf("\nerro 75");
+        printf("erro 75\n");
         break;
     }
 
     childNode->C1 = vector[0];
-    shiftRightImplement(dadNode, vector[1], where);
+    shiftRightImplement(dadNode, vector[1], whereToInsert(dadNode, aux));
     newRight->C1 = vector[2];
     newRight->C2 = vector[3];
     childNode->C2 = NULL;
@@ -301,7 +331,7 @@ int insertIndexString(BTreeNode **root, char *aux, int *highestTree)
                 return 0; //  Inserido corretamente sem precisar de promover
             }
             else if (isRoot((*root), (*highestTree)))
-            {   
+            {
                 BTreeNode *newRoot = initNode();
                 BTreeNode *newRight = initNode();
                 splitNode(newRoot, *root, newRight, aux);
@@ -313,32 +343,128 @@ int insertIndexString(BTreeNode **root, char *aux, int *highestTree)
         }
     }
 
-    // else if (stringHigherThen(aux, root->C1, 0) == 2 && stringHigherThen(aux, root->C2, 0) == 1)
-    // {
-    //     if (root->P2 == NULL) // ou seja, n tem filho
-    //     {
-    //         // troca c1 para c2 e c2 para c3 e armazena aux em c1;
-    //         shiftRightImplement(root, aux, 2, promoted);
-    //     }
-    // }
+    else if (stringHigherThen(aux, (*root)->C1, 0) == 2 && stringHigherThen(aux, (*root)->C2, 0) == 1)
+    {
+        if (isNode((*root)->P2))
+        {
+            if (insertIndexString(&(*root)->P2, aux, highestTree))
+            {
+                if (isAvailable((*root)->C3) == 1)
+                {
+                    splitNode((*root), (*root)->P2, initNode(), aux);
+                    return 0;
+                }
+                else
+                    return 1;
+            }
+            return 0;
+        }
+        else
+        {
+            if (isAvailable((*root)->C3))
+            {
+                shiftRightImplement(*root, aux, 2);
+                return 0; //  Inserido corretamente sem precisar de promover
+            }
+            else if (isRoot((*root), (*highestTree)))
+            {
+                BTreeNode *newRoot = initNode();
+                BTreeNode *newRight = initNode();
+                splitNode(newRoot, *root, newRight, aux);
+                newRoot->P1 = *root;
+                newRoot->P2 = newRight;
+                *root = newRoot;
+            }
+            return 1; // para caso tenha que dar split
+        }
+    }
 
-    // else if (stringHigherThen(aux, root->C2, 0) == 2 && stringHigherThen(aux, root->C3, 0) == 1)
-    // {
-    //     if (root->P3 == NULL) // ou seja, n tem filho
-    //     {
-    //         // troca c1 para c2 e c2 para c3 e armazena aux em c1;
-    //         shiftRightImplement(root, aux, 3, promoted);
-    //     }
-    // }
+    else if (stringHigherThen(aux, (*root)->C2, 0) == 2 && stringHigherThen(aux, (*root)->C3, 0) == 1)
+    {
+        if (isNode((*root)->P3))
+        {
+            if (insertIndexString(&(*root)->P3, aux, highestTree))
+            {
+                if (isAvailable((*root)->C3) == 1)
+                {
+                    splitNode((*root), (*root)->P3, initNode(), aux);
+                    return 0;
+                }
+                else
+                    return 1;
+            }
+            return 0;
+        }
+        else
+        {
+            if (isAvailable((*root)->C3))
+            {
+                shiftRightImplement(*root, aux, 3);
+                return 0; //  Inserido corretamente sem precisar de promover
+            }
+            else if (isRoot((*root), (*highestTree)))
+            {
+                BTreeNode *newRoot = initNode();
+                BTreeNode *newRight = initNode();
+                splitNode(newRoot, *root, newRight, aux);
+                newRoot->P1 = *root;
+                newRoot->P2 = newRight;
+                *root = newRoot;
+            }
+            return 1; // para caso tenha que dar split
+        }
+    }
 
-    // else if (stringHigherThen(aux, root->C3, 0) == 2)
-    // {
-    //     if (root->P4 == NULL) // ou seja, n tem filho
-    //     {
-    //         // troca c1 para c2 e c2 para c3 e armazena aux em c1;
-    //         // shiftRightImplement(root, aux, 3,promoted);
-    //     }
-    // }
+    else if (stringHigherThen(aux, (*root)->C3, 0) == 2)
+    {
+        if (isNode((*root)->P4))
+        {
+            if (insertIndexString(&(*root)->P4, aux, highestTree))
+            {
+                if (isAvailable((*root)->C3) == 1)
+                {
+                    splitNode((*root), (*root)->P4, initNode(), aux);
+                    return 0;
+                }
+                else
+                {
+                    if (isRoot((*root), (*highestTree)))
+                    {
+                        BTreeNode *newRoot = initNode();
+                        BTreeNode *newRight = initNode();
+                        char **vector;
+                        int where = whereToInsert((*root)->P4, aux);
+
+                        vector[0] = strdup();
+
+                        newRoot->P1 = *root;
+                        newRoot->P2 = newRight;
+                        *root = newRoot;
+                    }
+                    else
+                    {
+                        splitNode((*root), (*root)->P4, initNode(), aux);
+                    }
+                    return 1;
+                }
+            }
+            return 0;
+        }
+        else
+        {
+            // vai direto pro teste da raíz, pois nunca terá como olocar, já está em C3 oc
+            if (isRoot((*root), (*highestTree)))
+            {
+                BTreeNode *newRoot = initNode();
+                BTreeNode *newRight = initNode();
+                splitNode(newRoot, *root, newRight, aux);
+                newRoot->P1 = *root;
+                newRoot->P2 = newRight;
+                *root = newRoot;
+            }
+            return 1; // para caso tenha que dar split
+        }
+    }
 }
 
 void insertIndex(BTreeNode *root, Dados *dados)
