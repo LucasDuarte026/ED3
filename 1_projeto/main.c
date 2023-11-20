@@ -47,26 +47,26 @@ int main()
 
 
         // teste para p1
-        // char *a = "H";
-        // char *b = "G";
-        // char *c = "F";
-        // char *d = "E";
-        // char *e = "D";
-        // char *f = "C";
-        // char *g = "B";
-        // char *h = "A";
+        char *a = "H";
+        char *b = "G";
+        char *c = "F";
+        char *d = "E";
+        char *e = "D";
+        char *f = "C";
+        char *g = "B";
+        char *h = "A";
 
 // teste para p4
-        char *a = "A";
-        char *b = "B";
-        char *c = "C";
-        char *d = "D";
-        char *e = "E";
-        char *f = "F";
-        char *g = "G";
-        char *h = "H";
-        char *i = "I";
-        char *j = "J";
+        // char *a = "A";
+        // char *b = "B";
+        // char *c = "C";
+        // char *d = "D";
+        // char *e = "E";
+        // char *f = "F";
+        // char *g = "G";
+        // char *h = "H";
+        // char *i = "I";
+        // char *j = "J";
 
         // char *a = "A";
         // char *b = "Z";
