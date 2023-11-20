@@ -212,8 +212,53 @@ static void shiftPointers(BTreeNode *dadNode, BTreeNode *childNode, BTreeNode *n
     }
 }
 
+static void shiftSplitPointers(BTreeNode *leftNode, BTreeNode *BottomRight, BTreeNode *topRight, BTreeNode **pointers, int place)
+{
+
+    switch (place)
+    {
+    case 1:
+
+        topRight->P1 = pointers[1];
+        topRight->P2 = pointers[2];
+        topRight->P3 = pointers[3];
+
+        leftNode->P2 = BottomRight;
+        leftNode->P3 = NULL;
+        leftNode->P4 = NULL;
+        break;
+    case 2:
+        topRight->P1 = BottomRight;
+        topRight->P2 = pointers[2];
+        topRight->P3 = pointers[3];
+
+        leftNode->P3 = NULL;
+        leftNode->P4 = NULL;
+        break;
+    case 3:
+        topRight->P1 = pointers[2];
+        topRight->P2 = BottomRight;
+        topRight->P3 = pointers[3];
+
+        leftNode->P3 = NULL;
+        leftNode->P4 = NULL;
+        break;
+    case 4:
+        topRight->P1 = pointers[2];
+        topRight->P2 = pointers[3];
+        topRight->P3 = BottomRight;
+        leftNode->P3 = NULL;
+        leftNode->P4 = NULL;
+        break;
+    default:
+        break;
+    }
+}
+
 int whereToInsert(BTreeNode *node, char *aux)
 {
+    if (stringHigherThen(aux, node->C1, 0) == 0)
+        return 1;
     if (stringHigherThen(aux, node->C1, 0) == 1)
         return 1;
     else if (stringHigherThen(aux, node->C1, 0) == 2 && stringHigherThen(aux, node->C2, 0) == 1)
@@ -226,37 +271,36 @@ int whereToInsert(BTreeNode *node, char *aux)
         return -1;
 }
 
-static char *splitNode(BTreeNode *dadNode, BTreeNode *childNode, BTreeNode *newRight, char *aux)
+char **promoteVector(BTreeNode *node, char **vector, char *aux)
 {
-    char **vector = (char **)malloc(4 * sizeof(char *));
-    int where = whereToInsert(childNode, aux);
+    int where = whereToInsert(node, aux);
     switch (where)
     {
     case 1:
         vector[0] = strdup(aux);
-        vector[1] = strdup(childNode->C1);
-        vector[2] = strdup(childNode->C2);
-        vector[3] = strdup(childNode->C3);
+        vector[1] = strdup(node->C1);
+        vector[2] = strdup(node->C2);
+        vector[3] = strdup(node->C3);
 
         break;
     case 2:
-        vector[0] = strdup(childNode->C1);
+        vector[0] = strdup(node->C1);
         vector[1] = strdup(aux);
-        vector[2] = strdup(childNode->C2);
-        vector[3] = strdup(childNode->C3);
+        vector[2] = strdup(node->C2);
+        vector[3] = strdup(node->C3);
 
         break;
     case 3:
-        vector[0] = strdup(childNode->C1);
-        vector[1] = strdup(childNode->C2);
+        vector[0] = strdup(node->C1);
+        vector[1] = strdup(node->C2);
         vector[2] = strdup(aux);
-        vector[3] = strdup(childNode->C3);
+        vector[3] = strdup(node->C3);
 
         break;
     case 4:
-        vector[0] = strdup(childNode->C1);
-        vector[1] = strdup(childNode->C2);
-        vector[2] = strdup(childNode->C3);
+        vector[0] = strdup(node->C1);
+        vector[1] = strdup(node->C2);
+        vector[2] = strdup(node->C3);
         vector[3] = strdup(aux);
 
         break;
@@ -265,16 +309,34 @@ static char *splitNode(BTreeNode *dadNode, BTreeNode *childNode, BTreeNode *newR
         printf("erro 75\n");
         break;
     }
+    return vector;
+}
 
+BTreeNode **promotePointers(BTreeNode *node, BTreeNode **pointers)
+{
+    pointers[0] = node->P1;
+    pointers[1] = node->P2;
+    pointers[2] = node->P3;
+    pointers[3] = node->P4;
+    return pointers;
+}
+
+static BTreeNode *splitNode(BTreeNode *dadNode, BTreeNode *childNode, BTreeNode *newRight, char *aux)
+{
+    char **vector = (char **)malloc(4 * sizeof(char *));
+    vector = promoteVector(childNode, vector, aux);
+    int test = 1;
     childNode->C1 = vector[0];
     // shiftRightImplement(dadNode, vector[1], whereToInsert(dadNode, aux));
     newRight->C1 = vector[2];
     newRight->C2 = vector[3];
     childNode->C2 = NULL;
     childNode->C3 = NULL;
-    shiftPointers(dadNode, childNode, newRight, whereToInsert(dadNode, vector[1]));
-
-    return vector[1];
+    if (test)
+    {
+        shiftPointers(dadNode, childNode, newRight, whereToInsert(dadNode, vector[1]));
+    }
+    return newRight;
 }
 
 int isRoot(BTreeNode *root, int highestTree)
@@ -302,6 +364,8 @@ int isRoot(BTreeNode *root, int highestTree)
 /* Testa e insere o dado dentro do arquivo de index */
 char **insertIndexString(BTreeNode **root, char *aux, int *highestTree)
 {
+    char **promoted = (char **)malloc(4 * sizeof(char *));
+    BTreeNode **pointers = (BTreeNode **)malloc(4 * sizeof(BTreeNode *));
     if (*highestTree < heightTree((*root)))
         *highestTree = heightTree((*root));
 
@@ -317,185 +381,230 @@ char **insertIndexString(BTreeNode **root, char *aux, int *highestTree)
         printf("aux: %s não armazenado, eh igual um dos indices\n", aux);
     }
 
-    /*
-        // Inserir na 1ª posição
-        else if (stringHigherThen(aux, (*root)->C1, 0) == 1)
-        {
-            if (isNode((*root)->P1))
-            {
-                if (insertIndexString(&(*root)->P1, aux, highestTree))
-                {
-                    if (isAvailable((*root)->C3) == 1)
-                    {
-                        char *promoted = splitNode((*root), (*root)->P1, initNode(), aux);
-                        shiftRightImplement(*root, promoted, whereToInsert(*root, promoted));
-                        return 0;
-                    }
-                    else
-                        return 1;
-                }
-                return 0;
-            }
-            else
-            {
-                if (isAvailable((*root)->C3))
-                {
-                    shiftRightImplement(*root, aux, 1);
-                    return 0; //  Inserido corretamente sem precisar de promover
-                }
-                else if (isRoot((*root), (*highestTree)))
-                {
-                    BTreeNode *newRoot = initNode();
-                    BTreeNode *newRight = initNode();
-                    splitNode(newRoot, *root, newRight, aux);
-                    newRoot->P1 = *root;
-                    newRoot->P2 = newRight;
-                    *root = newRoot;
-                }
-                return 1; // para caso tenha que dar split
-            }
-        }
-
-        // Inserir na 2ª posição
-        else if (stringHigherThen(aux, (*root)->C1, 0) == 2 && stringHigherThen(aux, (*root)->C2, 0) == 1)
-        {
-            if (isNode((*root)->P2))
-            {
-                if (insertIndexString(&(*root)->P2, aux, highestTree))
-                {
-                    if (isAvailable((*root)->C3) == 1)
-                    {
-                        char *promoted = splitNode((*root), (*root)->P2, initNode(), aux);
-                        shiftRightImplement(*root, promoted, whereToInsert(*root, promoted));
-                        return 0;
-                    }
-                    else
-                        return 1;
-                }
-                return 0;
-            }
-            else
-            {
-                if (isAvailable((*root)->C3))
-                {
-                    shiftRightImplement(*root, aux, 2);
-                    return 0; //  Inserido corretamente sem precisar de promover
-                }
-                else if (isRoot((*root), (*highestTree)))
-                {
-                    BTreeNode *newRoot = initNode();
-                    BTreeNode *newRight = initNode();
-                    splitNode(newRoot, *root, newRight, aux);
-                    newRoot->P1 = *root;
-                    newRoot->P2 = newRight;
-                    *root = newRoot;
-                }
-                return 1; // para caso tenha que dar split
-            }
-        }
-
-        // Inserir na 3ª posição
-        else if (stringHigherThen(aux, (*root)->C2, 0) == 2 && stringHigherThen(aux, (*root)->C3, 0) == 1)
-        {
-            if (isNode((*root)->P3))
-            {
-                if (insertIndexString(&(*root)->P3, aux, highestTree))
-                {
-                    if (isAvailable((*root)->C3) == 1)
-                    {
-                        char *promoted = splitNode((*root), (*root)->P3, initNode(), aux);
-                        shiftRightImplement(*root, promoted, whereToInsert(*root, promoted));
-                        return 0;
-                    }
-                    else
-                        return 1;
-                }
-                return 0;
-            }
-            else
-            {
-                if (isAvailable((*root)->C3))
-                {
-                    shiftRightImplement(*root, aux, 3);
-                    return 0; //  Inserido corretamente sem precisar de promover
-                }
-                else if (isRoot((*root), (*highestTree)))
-                {
-                    BTreeNode *newRoot = initNode();
-                    BTreeNode *newRight = initNode();
-                    splitNode(newRoot, *root, newRight, aux);
-                    newRoot->P1 = *root;
-                    newRoot->P2 = newRight;
-                    *root = newRoot;
-                }
-                return 1; // para caso tenha que dar split
-            }
-        }
-    */
-    // Inserir na ultima posição
-    else if (stringHigherThen(aux, (*root)->C3, 0) == 2)
+    // Inserir na 1ª posição
+    else if (stringHigherThen(aux, (*root)->C1, 0) == 1)
     {
-        if (isNode((*root)->P4)) // teste para caso tenha filhos
+        if (isNode((*root)->P1))
         {
-            if (insertIndexString(&(*root)->P4, aux, highestTree))
+            if (promoted = insertIndexString(&(*root)->P1, aux, highestTree))
             {
                 if (isAvailable((*root)->C3) == 1)
                 {
-                    splitNode((*root), (*root)->P4, initNode(), aux);
-                    shiftRightImplement(*root, (*root)->P4->promote_aux, whereToInsert(*root, (*root)->P4->promote_aux));
-                    return 0;
+                    BTreeNode *newRight = initNode();
+
+                    newRight = splitNode((*root), (*root)->P1, newRight, aux);
+                    shiftRightImplement(*root, promoted[1], whereToInsert(*root, promoted[1]));
+                    return NULL;
+                }
+                else if (isRoot((*root), (*highestTree)))
+                {
+                    BTreeNode *newRoot = initNode();
+                    BTreeNode *newBottomRight = initNode();
+                    BTreeNode *newTopperRight = initNode();
+
+                    char *bottomPromoted = promoted[1];
+                    promoted = promoteVector((*root), promoted, promoted[1]);
+                    pointers = promotePointers((*root), pointers);
+
+                    newBottomRight = splitNode((*root), (*root)->P1, newBottomRight, aux);
+                    newTopperRight = splitNode(newRoot, *root, newTopperRight, bottomPromoted);
+                    // newTopperRight
+                    // shiftPointers(newRoot, (*root), newTopperRight, whereToInsert(newRoot, bottomPromoted));
+                    shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted));
+
+                    newRoot->P1 = *root;
+                    newRoot->P2 = newTopperRight;
+                    newRoot->C1 = promoted[1];
+                    *root = newRoot;
+                    return NULL;
                 }
                 else
                 {
-                    if (isRoot((*root), (*highestTree)))
-                    {
-                        char *vector[4];
+                    BTreeNode *newBottomRight = initNode();
+                    BTreeNode *newTopperRight = initNode();
 
-                        BTreeNode *newRoot = initNode();
+                    char *bottomPromoted = promoted[1];
+                    promoted = promoteVector((*root), promoted, promoted[1]);
+                    pointers = promotePointers((*root), pointers);
 
-                        // parte do nó de baixo
-                        BTreeNode *newRight = initNode();
+                    newBottomRight = splitNode((*root), (*root)->P1, newBottomRight, aux);
+                    // newTopperRight = splitNode(newRoot, *root, newTopperRight, bottomPromoted);
+                    // newTopperRight
+                    // shiftPointers(newRoot, (*root), newTopperRight, whereToInsert(newRoot, bottomPromoted));
+                    // shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted));
 
-                        shiftRightImplement(newTopperRight, promoted, whereToInsert(newTopperRight, promoted));
-                        newTopperRight->P1 = (*root)->P4;
-                        newTopperRight->P2 = newRight;
-
-                        // parte do nó de cima
-
-                        char *promoted = splitNode(newRoot, (*root), newTopperRight, aux);
-                        shiftRightImplement(newRoot, promoted, whereToInsert(newTopperRight, promoted));
-
-                        *root = newRoot;
-                    }
-                    else
-                    {
-                        BTreeNode *newRight = initNode();
-
-                        newRight = splitNode((*root), (*root)->P4, newRight, aux);
-                    }
-                    return 1;
+                    return promoted;
                 }
             }
-            return 0;
-        }
-
-        else if (isRoot((*root), (*highestTree)))
-        {
-            BTreeNode *newRoot = initNode();
-            BTreeNode *newRight = initNode();
-            char *promoted = splitNode(newRoot, *root, newRight, aux);
-            newRoot->P1 = *root;
-            newRoot->P2 = newRight;
-            newRoot->C1 = strdup(promoted);
-            *root = newRoot;
+            return NULL;
         }
         else
         {
+            if (isAvailable((*root)->C3))
+            {
+                shiftRightImplement(*root, aux, 1);
+                return NULL; //  Inserido corretamente sem precisar de promover
+            }
+            else if (isRoot((*root), (*highestTree)))
+            {
+                BTreeNode *newRoot = initNode();
+                BTreeNode *newRight = initNode();
+                promoted = promoteVector((*root), promoted, aux);
+                newRight = splitNode(newRoot, *root, newRight, aux);
+                newRoot->P1 = *root;
+                newRoot->P2 = newRight;
+                newRoot->C1 = promoted[1];
+                *root = newRoot;
+                return NULL;
+            }
+            promoted = promoteVector((*root), promoted, aux);
+            return promoted; // para caso tenha que dar split
         }
-        return 1; // para caso tenha que dar split
     }
-}
+    /*
+           // Inserir na 2ª posição
+           else if (stringHigherThen(aux, (*root)->C1, 0) == 2 && stringHigherThen(aux, (*root)->C2, 0) == 1)
+           {
+               if (isNode((*root)->P2))
+               {
+                   if (insertIndexString(&(*root)->P2, aux, highestTree))
+                   {
+                       if (isAvailable((*root)->C3) == 1)
+                       {
+                           char *promoted = splitNode((*root), (*root)->P2, initNode(), aux);
+                           shiftRightImplement(*root, promoted, whereToInsert(*root, promoted));
+                           return 0;
+                       }
+                       else
+                           return 1;
+                   }
+                   return 0;
+               }
+               else
+               {
+                   if (isAvailable((*root)->C3))
+                   {
+                       shiftRightImplement(*root, aux, 2);
+                       return 0; //  Inserido corretamente sem precisar de promover
+                   }
+                   else if (isRoot((*root), (*highestTree)))
+                   {
+                       BTreeNode *newRoot = initNode();
+                       BTreeNode *newRight = initNode();
+                       splitNode(newRoot, *root, newRight, aux);
+                       newRoot->P1 = *root;
+                       newRoot->P2 = newRight;
+                       *root = newRoot;
+                   }
+                   return 1; // para caso tenha que dar split
+               }
+           }
 
+           // Inserir na 3ª posição
+           else if (stringHigherThen(aux, (*root)->C2, 0) == 2 && stringHigherThen(aux, (*root)->C3, 0) == 1)
+           {
+               if (isNode((*root)->P3))
+               {
+                   if (insertIndexString(&(*root)->P3, aux, highestTree))
+                   {
+                       if (isAvailable((*root)->C3) == 1)
+                       {
+                           char *promoted = splitNode((*root), (*root)->P3, initNode(), aux);
+                           shiftRightImplement(*root, promoted, whereToInsert(*root, promoted));
+                           return 0;
+                       }
+                       else
+                           return 1;
+                   }
+                   return 0;
+               }
+               else
+               {
+                   if (isAvailable((*root)->C3))
+                   {
+                       shiftRightImplement(*root, aux, 3);
+                       return 0; //  Inserido corretamente sem precisar de promover
+                   }
+                   else if (isRoot((*root), (*highestTree)))
+                   {
+                       BTreeNode *newRoot = initNode();
+                       BTreeNode *newRight = initNode();
+                       splitNode(newRoot, *root, newRight, aux);
+                       newRoot->P1 = *root;
+                       newRoot->P2 = newRight;
+                       *root = newRoot;
+                   }
+                   return 1; // para caso tenha que dar split
+               }
+           }
+
+           // Inserir na ultima posição
+           else if (stringHigherThen(aux, (*root)->C3, 0) == 2)
+       {
+           if (isNode((*root)->P4)) // teste para caso tenha filhos
+           {
+               if (char **promoted = insertIndexString(&(*root)->P4, aux, highestTree))
+               {
+                   if (isAvailable((*root)->C3) == 1)
+                   {
+                       BTreeNode *newRight = initNode();
+                       newRight = splitNode((*root), (*root)->P4, newRight, aux);
+                       shiftRightImplement(*root, promoted[1], whereToInsert(*root, promoted[1]));
+                       return 0;
+                   }
+                   else
+                   {
+                       if (isRoot((*root), (*highestTree)))
+                       {
+                           char *vector[4];
+
+                           BTreeNode *newRoot = initNode();
+
+                           // parte do nó de baixo
+                           BTreeNode *newRight = initNode();
+
+                           shiftRightImplement(newTopperRight, promoted, whereToInsert(newTopperRight, promoted));
+                           newTopperRight->P1 = (*root)->P4;
+                           newTopperRight->P2 = newRight;
+
+                           // parte do nó de cima
+
+                           char *promoted = splitNode(newRoot, (*root), newTopperRight, aux);
+                           shiftRightImplement(newRoot, promoted, whereToInsert(newTopperRight, promoted));
+
+                           *root = newRoot;
+                       }
+                       else
+                       {
+                           promoted
+                               BTreeNode *newRight = initNode();
+
+                           newRight = splitNode((*root), (*root)->P4, newRight, aux);
+                       }
+                       return 1;
+                   }
+               }
+               return 0;
+           }
+
+           else if (isRoot((*root), (*highestTree)))
+           {
+               BTreeNode *newRoot = initNode();
+               BTreeNode *newRight = initNode();
+               char *promoted = splitNode(newRoot, *root, newRight, aux);
+               newRoot->P1 = *root;
+               newRoot->P2 = newRight;
+               newRoot->C1 = strdup(promoted);
+               *root = newRoot;
+           }
+           else // É nó folha
+           {
+           }
+           return 1; // para caso tenha que dar split
+       }
+   */
+}
+/*
 int insertIndexStringBackUp(BTreeNode **root, char *aux, int *highestTree)
 {
     if (*highestTree < heightTree((*root)))
@@ -690,7 +799,7 @@ int insertIndexStringBackUp(BTreeNode **root, char *aux, int *highestTree)
         }
     }
 }
-
+*/
 void insertIndex(BTreeNode *root, Dados *dados)
 {
     int stringConcatMaxSize = strlen(dados->nomeTecnologiaDestino.string) + strlen(dados->nomeTecnologiaOrigem.string) + 1; //  Para se concatenar, achas-se o tamanho total da string concatenada

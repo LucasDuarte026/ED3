@@ -47,14 +47,32 @@ int main()
 
 
         // teste para p1
-        char *a = "H";
-        char *b = "G";
-        char *c = "F";
-        char *d = "E";
-        char *e = "D";
-        char *f = "C";
-        char *g = "B";
-        char *h = "A";
+        char *a = "Z";
+        char *b = "Y";
+        char *c = "X";
+        char *d = "W";
+        char *e = "V";
+        char *f = "U";
+        char *g = "T";
+        char *h = "S";
+        char *i = "R";
+        char *j = "Q";
+        char *k = "P";
+        char *l = "O";
+        char *m = "N";
+        char *n = "M";
+        char *o = "L";
+        char *p = "K";
+        char *q = "J";
+        char *r = "I";
+        char *s = "H";
+        char *t = "G";
+        char *u = "F";
+        char *v = "E";
+        char *w = "D";
+        char *x = "C";
+        char *y = "B";
+        char *z = "A";
 
 // teste para p4
         // char *a = "A";
@@ -91,6 +109,22 @@ int main()
         insertIndexString(&root, h, &highestTree);
         insertIndexString(&root, i, &highestTree);
         insertIndexString(&root, j, &highestTree);
+        insertIndexString(&root, k, &highestTree);
+        insertIndexString(&root, l, &highestTree);
+        insertIndexString(&root, m, &highestTree);
+        insertIndexString(&root, n, &highestTree);
+        insertIndexString(&root, o, &highestTree);
+        insertIndexString(&root, p, &highestTree);
+        insertIndexString(&root, q, &highestTree);
+        insertIndexString(&root, r, &highestTree);
+        insertIndexString(&root, s, &highestTree);
+        insertIndexString(&root, t, &highestTree);
+        insertIndexString(&root, u, &highestTree);
+        insertIndexString(&root, v, &highestTree);
+        insertIndexString(&root, w, &highestTree);
+        insertIndexString(&root, x, &highestTree);
+        insertIndexString(&root, y, &highestTree);
+        insertIndexString(&root, z, &highestTree);
 
         break;
     case '6':
