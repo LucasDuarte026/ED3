@@ -215,9 +215,6 @@ void functionality_3(const char binArchiveName[], int n)
             fread(&dados.removido, sizeof(char), 1, bin);
             if (dados.removido == '0')
             {
-                fseek(bin, -2, SEEK_CUR); //  retrocede 1 e testa se o anterior era '$'
-                fread(&dados.removido, sizeof(char), 1, bin);
-                fread(&dados.removido, sizeof(char), 1, bin);
 
                 fread(&dados.grupo, sizeof(int), 1, bin);
                 fread(&dados.popularidade, sizeof(int), 1, bin);
@@ -243,7 +240,7 @@ void functionality_3(const char binArchiveName[], int n)
             }
             else if (dados.removido == '1')
             {
-                fseek(bin, TAM_REGISTRO, SEEK_SET);
+                fseek(bin, TAM_REGISTRO, SEEK_CUR);
             }
         }
         if (registros_encontrados == 0)

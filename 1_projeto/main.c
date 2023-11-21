@@ -37,14 +37,14 @@ int main()
     case '3':
     case '4':
     case '5':
-        // scanf("%s", argumento_2);
-        // scanf("%s", argumento_3);
-        // binRegName = argumento_2;
-        // binArchiveName = argumento_3;
-        binRegName = "dados1.bin";     // inserção manual do nome dos arquivos para debug
-        binArchiveName = "output.bin"; // inserção manual do nome dos arquivos para debug
-                                       // functionality_5(binRegName, binArchiveName);
+        scanf("%s", argumento_2);
+        scanf("%s", argumento_3);
+        binRegName = argumento_2;
+        binArchiveName = argumento_3;
+        
+        functionality_5(binRegName, binArchiveName);
 
+        /*
         // teste para p1
         char *a = "Z";
         char *b = "Y";
@@ -151,6 +151,7 @@ int main()
         insertIndexString(&root, "c", &highestTree);
         insertIndexString(&root, "b", &highestTree);
         insertIndexString(&root, "a", &highestTree);
+        */
         break;
     case '6':
     case '7':
