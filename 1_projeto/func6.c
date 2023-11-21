@@ -31,7 +31,7 @@ void functionality_6(const char dataFileName[], const char indexFileName[], int 
             if(recordRRN != -1) {
                 Data recordData;
                 if (retrieve_record(dataFile, recordRRN, &recordData)) { // Assuming retrieve_record returns 1 on success
-                    print_record(&recordData); // Use the same printing function as functionality 3
+                    printa_registro(&recordData); 
                 } else {
                     printf("Record not found.\n");
                 }
@@ -39,9 +39,7 @@ void functionality_6(const char dataFileName[], const char indexFileName[], int 
                 printf("Record not found.\n");
             }
         } else {
-            //if not...
-            // Sequential search as in functionality 3
-            // ... (Here you would use the functionality 3 code to perform the sequential search)
+           
         }
     }
 
