@@ -88,6 +88,7 @@ static void binarioNaTela(const char *nomeArquivoBinario)
     }
     fseek(fs, 0, SEEK_END);
     fl = ftell(fs);
+    //Conforme visto na funcionalidade [2], na linguagem SQL o comando SELECT é
     fseek(fs, 0, SEEK_SET);
     mb = (unsigned char *)malloc(fl);
     fread(mb, 1, fl, fs);
@@ -380,7 +381,6 @@ static char **testa_unico(int *prt_quant_tec, Dados dado, char **tecnologies)
 
     return tecnologies; // E devolve tecnologies devidamente modificado
 }
-
 static char **testa_par(int *prt_quant_tec_par, Dados dado, char **pares)
 {
     int stringConcatMaxSize = strlen(dado.nomeTecnologiaDestino.string) + strlen(dado.nomeTecnologiaOrigem.string) + 1; //  Para se concatenar, achas-se o tamanho total da string concatenada
@@ -439,7 +439,6 @@ short int Functionality_1(const char csvArchiveName[], const char binArchiveName
         Escrever_Dados(bin, dados);                                //  Escreve o dado no arquivo binário
         tecnologies = testa_unico(&quant_tec, dados, tecnologies); //  Função que retorna a quantidade de tecnologia unicas
         pares = testa_par(&duplicade_quant_tec, dados, pares);     //  Função que retorna a quantidade de tecnologia duplicadas em pares
-
 
         if (!flag_origin) // Uso da flag para só dar free nos elementos variavéis caso eles não sejam nulos (não foram criados)
         {
