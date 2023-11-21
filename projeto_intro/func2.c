@@ -37,63 +37,37 @@ void functionality_2(const char binArchiveName[])
     int encontrado = 0; // para testar registro inexistente
 
     // le tudo do registro desejado a seguir
-    fread(&dados.removido, sizeof(char), 1, bin);
-    if (dados.removido == '0') // até encotrar o primeiro "removido"
-    {
-        fread(&dados.grupo, sizeof(int), 1, bin);
-        fread(&dados.popularidade, sizeof(int), 1, bin);
-        fread(&dados.peso, sizeof(int), 1, bin);
-
-        fread(&dados.nomeTecnologiaOrigem.tamanho, sizeof(int), 1, bin);
-        dados.nomeTecnologiaOrigem.string = (char *)malloc(dados.nomeTecnologiaOrigem.tamanho + 1);
-        fread(dados.nomeTecnologiaOrigem.string, sizeof(char), dados.nomeTecnologiaOrigem.tamanho, bin);
-        dados.nomeTecnologiaOrigem.string[dados.nomeTecnologiaOrigem.tamanho] = '\0';
-
-        fread(&dados.nomeTecnologiaDestino.tamanho, sizeof(int), 1, bin);
-        dados.nomeTecnologiaDestino.string = (char *)malloc(dados.nomeTecnologiaDestino.tamanho + 1);
-        fread(dados.nomeTecnologiaDestino.string, sizeof(char), dados.nomeTecnologiaDestino.tamanho, bin);
-        dados.nomeTecnologiaDestino.string[dados.nomeTecnologiaDestino.tamanho] = '\0';
-
-        printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
-
-        free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
-        free(dados.nomeTecnologiaDestino.string);
-    }
     while (!feof(bin))
     {
         fread(&dados.removido, sizeof(char), 1, bin);
         if (dados.removido == '0')
         {
-            fseek(bin, -2, SEEK_CUR); //  retrocede 1 e testa se o anterior era '$'
+
             fread(&dados.removido, sizeof(char), 1, bin);
-            if (dados.removido == '$')
-            {
-                fread(&dados.removido, sizeof(char), 1, bin);
 
-                encontrado = 1;
-                fread(&dados.grupo, sizeof(int), 1, bin);
-                fread(&dados.popularidade, sizeof(int), 1, bin);
-                fread(&dados.peso, sizeof(int), 1, bin);
+            encontrado = 1;
+            fread(&dados.grupo, sizeof(int), 1, bin);
+            fread(&dados.popularidade, sizeof(int), 1, bin);
+            fread(&dados.peso, sizeof(int), 1, bin);
 
-                fread(&dados.nomeTecnologiaOrigem.tamanho, sizeof(int), 1, bin);
-                dados.nomeTecnologiaOrigem.string = (char *)malloc(dados.nomeTecnologiaOrigem.tamanho + 1);
-                fread(dados.nomeTecnologiaOrigem.string, sizeof(char), dados.nomeTecnologiaOrigem.tamanho, bin);
-                dados.nomeTecnologiaOrigem.string[dados.nomeTecnologiaOrigem.tamanho] = '\0';
+            fread(&dados.nomeTecnologiaOrigem.tamanho, sizeof(int), 1, bin);
+            dados.nomeTecnologiaOrigem.string = (char *)malloc(dados.nomeTecnologiaOrigem.tamanho + 1);
+            fread(dados.nomeTecnologiaOrigem.string, sizeof(char), dados.nomeTecnologiaOrigem.tamanho, bin);
+            dados.nomeTecnologiaOrigem.string[dados.nomeTecnologiaOrigem.tamanho] = '\0';
 
-                fread(&dados.nomeTecnologiaDestino.tamanho, sizeof(int), 1, bin);
-                dados.nomeTecnologiaDestino.string = (char *)malloc(dados.nomeTecnologiaDestino.tamanho + 1);
-                fread(dados.nomeTecnologiaDestino.string, sizeof(char), dados.nomeTecnologiaDestino.tamanho, bin);
-                dados.nomeTecnologiaDestino.string[dados.nomeTecnologiaDestino.tamanho] = '\0';
+            fread(&dados.nomeTecnologiaDestino.tamanho, sizeof(int), 1, bin);
+            dados.nomeTecnologiaDestino.string = (char *)malloc(dados.nomeTecnologiaDestino.tamanho + 1);
+            fread(dados.nomeTecnologiaDestino.string, sizeof(char), dados.nomeTecnologiaDestino.tamanho, bin);
+            dados.nomeTecnologiaDestino.string[dados.nomeTecnologiaDestino.tamanho] = '\0';
 
-                printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
+            printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
 
-                free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
-                free(dados.nomeTecnologiaDestino.string);
-            }
-            else
-            {
-                fseek(bin, 1, SEEK_CUR); //  procede 2 pra pular o lixo de '0 ' no meio do bin
-            }
+            free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
+            free(dados.nomeTecnologiaDestino.string);
+        }
+        else if (dados.removido == '1')
+        {
+            fseek(bin, TAM_REGISTRO, SEEK_SET); //  Pula para o próximo registro 
         }
     }
     if (!encontrado)

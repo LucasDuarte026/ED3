@@ -210,30 +210,6 @@ void functionality_3(const char binArchiveName[], int n)
         Dados dados;                   //  Inicializa os dados que serão inseridos caso ache
 
         fseek(bin, TAM_CABECALHO, SEEK_SET); //  Pula o cabeçalho até o primeiro RRN
-        fread(&dados.removido, sizeof(char), 1, bin);
-        if (dados.removido == '0') //  Análogo a função já implmentada
-        {
-            fread(&dados.grupo, sizeof(int), 1, bin);
-            fread(&dados.popularidade, sizeof(int), 1, bin);
-            fread(&dados.peso, sizeof(int), 1, bin);
-
-            fread(&dados.nomeTecnologiaOrigem.tamanho, sizeof(int), 1, bin);
-            dados.nomeTecnologiaOrigem.string = (char *)malloc(dados.nomeTecnologiaOrigem.tamanho + 1);
-            fread(dados.nomeTecnologiaOrigem.string, sizeof(char), dados.nomeTecnologiaOrigem.tamanho, bin);
-            dados.nomeTecnologiaOrigem.string[dados.nomeTecnologiaOrigem.tamanho] = '\0';
-
-            fread(&dados.nomeTecnologiaDestino.tamanho, sizeof(int), 1, bin);
-            dados.nomeTecnologiaDestino.string = (char *)malloc(dados.nomeTecnologiaDestino.tamanho + 1);
-            fread(dados.nomeTecnologiaDestino.string, sizeof(char), dados.nomeTecnologiaDestino.tamanho, bin);
-            dados.nomeTecnologiaDestino.string[dados.nomeTecnologiaDestino.tamanho] = '\0';
-
-            if (testa_campo(nomeCampo, valorCampo, &dados))
-            {
-                registros_encontrados++;
-            }
-            free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
-            free(dados.nomeTecnologiaDestino.string);
-        }
         while (!feof(bin))
         {
             fread(&dados.removido, sizeof(char), 1, bin);
@@ -241,36 +217,33 @@ void functionality_3(const char binArchiveName[], int n)
             {
                 fseek(bin, -2, SEEK_CUR); //  retrocede 1 e testa se o anterior era '$'
                 fread(&dados.removido, sizeof(char), 1, bin);
-                if (dados.removido == '$')
+                fread(&dados.removido, sizeof(char), 1, bin);
+
+                fread(&dados.grupo, sizeof(int), 1, bin);
+                fread(&dados.popularidade, sizeof(int), 1, bin);
+                fread(&dados.peso, sizeof(int), 1, bin);
+
+                fread(&dados.nomeTecnologiaOrigem.tamanho, sizeof(int), 1, bin);
+                dados.nomeTecnologiaOrigem.string = (char *)malloc(dados.nomeTecnologiaOrigem.tamanho + 1);
+                fread(dados.nomeTecnologiaOrigem.string, sizeof(char), dados.nomeTecnologiaOrigem.tamanho, bin);
+                dados.nomeTecnologiaOrigem.string[dados.nomeTecnologiaOrigem.tamanho] = '\0';
+
+                fread(&dados.nomeTecnologiaDestino.tamanho, sizeof(int), 1, bin);
+                dados.nomeTecnologiaDestino.string = (char *)malloc(dados.nomeTecnologiaDestino.tamanho + 1);
+                fread(dados.nomeTecnologiaDestino.string, sizeof(char), dados.nomeTecnologiaDestino.tamanho, bin);
+                dados.nomeTecnologiaDestino.string[dados.nomeTecnologiaDestino.tamanho] = '\0';
+
+                if (testa_campo(nomeCampo, valorCampo, &dados))
                 {
-                    fread(&dados.removido, sizeof(char), 1, bin);
-
-                    fread(&dados.grupo, sizeof(int), 1, bin);
-                    fread(&dados.popularidade, sizeof(int), 1, bin);
-                    fread(&dados.peso, sizeof(int), 1, bin);
-
-                    fread(&dados.nomeTecnologiaOrigem.tamanho, sizeof(int), 1, bin);
-                    dados.nomeTecnologiaOrigem.string = (char *)malloc(dados.nomeTecnologiaOrigem.tamanho + 1);
-                    fread(dados.nomeTecnologiaOrigem.string, sizeof(char), dados.nomeTecnologiaOrigem.tamanho, bin);
-                    dados.nomeTecnologiaOrigem.string[dados.nomeTecnologiaOrigem.tamanho] = '\0';
-
-                    fread(&dados.nomeTecnologiaDestino.tamanho, sizeof(int), 1, bin);
-                    dados.nomeTecnologiaDestino.string = (char *)malloc(dados.nomeTecnologiaDestino.tamanho + 1);
-                    fread(dados.nomeTecnologiaDestino.string, sizeof(char), dados.nomeTecnologiaDestino.tamanho, bin);
-                    dados.nomeTecnologiaDestino.string[dados.nomeTecnologiaDestino.tamanho] = '\0';
-
-                    if (testa_campo(nomeCampo, valorCampo, &dados))
-                    {
-                        registros_encontrados++;
-                    }
-
-                    free(dados.nomeTecnologiaOrigem.string); //  Libera o campo variável como desejado pelo projeto
-                    free(dados.nomeTecnologiaDestino.string);
+                    registros_encontrados++;
                 }
-                else
-                {
-                    fseek(bin, 1, SEEK_CUR); //  procede 2 pra pular o lixo de '0 ' no meio do bin
-                }
+
+                free(dados.nomeTecnologiaOrigem.string); //  Libera o campo variável como desejado pelo projeto
+                free(dados.nomeTecnologiaDestino.string);
+            }
+            else if (dados.removido == '1')
+            {
+                fseek(bin, TAM_REGISTRO, SEEK_SET);
             }
         }
         if (registros_encontrados == 0)
