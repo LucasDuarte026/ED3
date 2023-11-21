@@ -53,46 +53,29 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
         return;
     }
     Dados dados;
+    int encontrado = 0;  // para testar registro inexistente
+    int highestTree = 0; // para testar registro inexistente
 
     fseek(bin, TAM_CABECALHO, SEEK_SET); //  Para pular o cabeçalho
 
-    int encontrado = 0; // para testar registro inexistente
-
     // le tudo do registro desejado a seguir
-    fread(&dados.removido, sizeof(char), 1, bin);
-    if (dados.removido == '0') // até encotrar o primeiro "removido"
-    {
-        dados = *lerRegistro(bin, &dados);
-
-        // printa_registro(&dados);   //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
-        insertIndex(root, &dados); // Testa e insere o dado dentro do arquivo de index
-
-        free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
-        free(dados.nomeTecnologiaDestino.string);
-    }
     while (!feof(bin))
     {
         fread(&dados.removido, sizeof(char), 1, bin);
         if (dados.removido == '0')
         {
-            fseek(bin, -2, SEEK_CUR); //  retrocede 1 e testa se o anterior era '$'
-            fread(&dados.removido, sizeof(char), 1, bin);
-            if (dados.removido == '$')
-            {
-                fread(&dados.removido, sizeof(char), 1, bin);
-                dados = *lerRegistro(bin, &dados);
 
-                encontrado = 1;
+            dados = *lerRegistro(bin, &dados);
+            // printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
 
-                // printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
-                insertIndex(root, &dados);
-                free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
-                free(dados.nomeTecnologiaDestino.string);
-            }
-            else
-            {
-                fseek(bin, 1, SEEK_CUR); //  procede 2 pra pular o lixo de '0 ' no meio do bin
-            }
+            insertIndex(&root, &dados, &highestTree);
+            free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
+            free(dados.nomeTecnologiaDestino.string);
+            encontrado = 1;
+        }
+        else if (dados.removido == '1')
+        {
+            fseek(bin, TAM_REGISTRO, SEEK_CUR); // Pula o registro removido            }
         }
     }
     if (!encontrado)
@@ -100,4 +83,5 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
         printf("Falha no processamento do arquivo.\n");
     }
     fclose(bin);
+    fclose(bin_index);
 }

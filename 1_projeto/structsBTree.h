@@ -93,6 +93,8 @@ typedef struct BTreeNode
     char *C3;
     int PR3;
     struct BTreeNode *P4;
+    char ** promoted_aux;
+
 
 } BTreeNode;
 
