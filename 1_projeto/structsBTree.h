@@ -93,11 +93,29 @@ typedef struct BTreeNode
     char *C3;
     int PR3;
     struct BTreeNode *P4;
-    char ** promoted_aux;
-
+    char **promoted_aux;
 
 } BTreeNode;
 
+// typedef struct Camp
+// {
+//     char *C1;
+//     int PR1;
+// } Camp;
 
+// typedef struct BTreeNodeNOVO
+// {
+//     DataTree data;
+
+//     struct BTreeNodeNOVO *P1;
+//     struct Camp* camp1; 
+//     struct BTreeNodeNOVO *P2;
+//     struct Camp* camp2; 
+//     struct BTreeNodeNOVO *P3;
+//     struct Camp* camp3; 
+//     struct BTreeNodeNOVO *P4;
+//     char **promoted_aux;
+
+// } BTreeNodeNOVO;
 
 #endif

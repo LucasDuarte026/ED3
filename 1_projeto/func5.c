@@ -2,6 +2,16 @@
 #include "B-Tree.h"
 #include "func3.h"
 
+void insertIndex(BTreeNode **root, Dados *dados, int *highestTree, int RRN)
+{
+    int stringConcatMaxSize = strlen(dados->nomeTecnologiaDestino.string) + strlen(dados->nomeTecnologiaOrigem.string) + 1; //  Para se concatenar, achas-se o tamanho total da string concatenada
+    char aux[stringConcatMaxSize];                                                                                          //  Cria um auxiliar para guardar tal string concatenada
+    strcpy(aux, dados->nomeTecnologiaOrigem.string);                                                                        // Copia origem na aux
+    strcat(aux, dados->nomeTecnologiaDestino.string);                                                                       // Concatena com destino
+    printf("%s\n", aux);
+    insertIndexString(root, aux, highestTree, RRN);
+}
+
 static Dados *lerRegistro(FILE *bin, Dados *dados) // Lê o registro completo e armazena em dados
 {
     fread(&dados->grupo, sizeof(int), 1, bin);
@@ -19,6 +29,32 @@ static Dados *lerRegistro(FILE *bin, Dados *dados) // Lê o registro completo e 
     dados->nomeTecnologiaDestino.string[dados->nomeTecnologiaDestino.tamanho] = '\0';
 
     return dados;
+}
+
+void updateTreeValues(BTreeNode **root)
+{
+    BTreeNode *ptr_root = (*root);
+
+    ptr_root->data.alturaNo = heightTree(ptr_root);
+    ptr_root->data.nroChavesNo = keysQuant(ptr_root);
+    printf("altura: |%2d| e quant key: |%d|\n", ptr_root->data.alturaNo, ptr_root->data.nroChavesNo);
+    // Repassar a funcção recursiva aos filhos
+    if (ptr_root->P1)
+    {
+        updateTreeValues(&ptr_root->P1);
+    }
+    if (ptr_root->P2)
+    {
+        updateTreeValues(&ptr_root->P2);
+    }
+    if (ptr_root->P3)
+    {
+        updateTreeValues(&ptr_root->P3);
+    }
+    if (ptr_root->P4)
+    {
+        updateTreeValues(&ptr_root->P4);
+    }
 }
 
 void functionality_5(char *binArchiveName, char *outArchiveName)
@@ -55,7 +91,7 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
     Dados dados;
     int encontrado = 0;  // para testar registro inexistente
     int highestTree = 0; // para testar registro inexistente
-
+    int RRN = 1;
     fseek(bin, TAM_CABECALHO, SEEK_SET); //  Para pular o cabeçalho
 
     // le tudo do registro desejado a seguir
@@ -66,15 +102,17 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
         {
 
             dados = *lerRegistro(bin, &dados);
-            // printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
+            printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
 
-            insertIndex(&root, &dados, &highestTree);
+            insertIndex(&root, &dados, &highestTree,RRN);
             free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
             free(dados.nomeTecnologiaDestino.string);
             encontrado = 1;
+            RRN++;
         }
         else if (dados.removido == '1')
         {
+            RRN++;
             fseek(bin, TAM_REGISTRO, SEEK_CUR); // Pula o registro removido            }
         }
     }
@@ -82,6 +120,9 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
     { // registro inexistente
         printf("Falha no processamento do arquivo.\n");
     }
+
+    updateTreeValues(&root);
+
     fclose(bin);
     fclose(bin_index);
 }
