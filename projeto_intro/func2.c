@@ -35,16 +35,13 @@ void functionality_2(const char binArchiveName[])
     fseek(bin, TAM_CABECALHO, SEEK_SET); //  Para pular o cabeçalho
 
     int encontrado = 0; // para testar registro inexistente
-
+    int counter = 0;
     // le tudo do registro desejado a seguir
-    while (!feof(bin))
+    while (fread(&dados.removido, sizeof(char), 1, bin))
     {
-        fread(&dados.removido, sizeof(char), 1, bin);
+
         if (dados.removido == '0')
         {
-
-            fread(&dados.removido, sizeof(char), 1, bin);
-
             encontrado = 1;
             fread(&dados.grupo, sizeof(int), 1, bin);
             fread(&dados.popularidade, sizeof(int), 1, bin);
@@ -67,8 +64,9 @@ void functionality_2(const char binArchiveName[])
         }
         else if (dados.removido == '1')
         {
-            fseek(bin, TAM_REGISTRO, SEEK_SET); //  Pula para o próximo registro 
+            fseek(bin, TAM_REGISTRO - 1, SEEK_CUR); //  Pula para o próximo registro (-1 pois já le o '1')
         }
+        counter++;
     }
     if (!encontrado)
     { // registro inexistente
