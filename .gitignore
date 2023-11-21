@@ -3,6 +3,8 @@ projeto_intro/testados
 projeto_intro/dados*.bin
 projeto_intro/main
 projeto_intro/version_entrega_1.zip
+
 1_projeto/output.*
 1_projeto/reference.c
+1_projeto/casos_teste2/
 .vscode/settings.json
