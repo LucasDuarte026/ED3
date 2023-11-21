@@ -370,6 +370,8 @@ BTreeNode *insertIndexString(BTreeNode **root, char *aux, int *highestTree)
     {
         insertInPlace(*root, aux, 1);
     }
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
     // Não inserir pois é elemento repetido
     else if (stringHigherThen(aux, (*root)->C1, 0) == 0 ||
              stringHigherThen(aux, (*root)->C2, 0) == 0 ||
@@ -378,433 +380,393 @@ BTreeNode *insertIndexString(BTreeNode **root, char *aux, int *highestTree)
         printf("aux: %s não armazenado, eh igual um dos indices\n", aux);
     }
 
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
     // Inserir na 1ª posição
     else if (stringHigherThen(aux, (*root)->C1, 0) == 1)
     {
-        if (isNode((*root)->P1))
+        if (isNode((*root)->P1)) // caso tenha um nó abaixo , repassa o código recursivo pra lá
         {
+            // Caso o filho retorne um novo newRight, entra aqui para processar a promoção de dado
             if (newRight = insertIndexString(&(*root)->P1, aux, highestTree))
             {
-                promoted = newRight->promoted_aux;
+                promoted = newRight->promoted_aux; // Usa a o auxiliar que vem junto com o nó promovido para pegar os dados promovidos
 
-                if (isAvailable((*root)->C3) == 1)
+                if (isAvailable((*root)->C3) == 1) // Se estiver disponível o nó pai, já coloca direto
                 {
-                    if (newRight->C1 == NULL)
+                    if (newRight->C1 == NULL) // Controle de promoção dupla, caso tenha, não entra
                     {
-                        newRight = splitNode((*root)->P1, newRight, aux);
+                        newRight = splitNode((*root)->P1, newRight, aux); // splita o nó da direita
                     }
-                    shiftPointers((*root), (*root)->P1, newRight, whereToInsert((*root), promoted[1]));
+                    shiftPointers((*root), (*root)->P1, newRight, whereToInsert((*root), promoted[1])); // shifta os ponteiros pro lugar correto
 
-                    shiftRightImplement(*root, promoted[1], whereToInsert(*root, promoted[1]));
-                    return NULL;
+                    shiftRightImplement(*root, promoted[1], whereToInsert(*root, promoted[1])); // Shift complementar que funciona apenas para promoções, rearranjando os ponteiros do split (P1, P2,P3,P4 e P5(na prática existe))
+                    return NULL;                                                                //  Retorna NULL pois não promove
                 }
-                else if (isRoot((*root), (*highestTree)))
+
+                else if (isRoot((*root), (*highestTree))) //  Caso seja raíz e esteja recebendo uma promoção de dados
                 {
-                    BTreeNode *newRoot = initNode();
-                    BTreeNode *newBottomRight = initNode();
-                    BTreeNode *newTopperRight = initNode();
+                    BTreeNode *newRoot = initNode();        //  Inicializa a nova raiz
+                    BTreeNode *newBottomRight = initNode(); //  Inicializa o novo nó direito superior
+                    BTreeNode *newTopperRight = initNode(); //  Inicializa o novo nó direito inferior
 
-                    char *bottomPromoted = promoted[1];
-                    promoted = promoteVector((*root), promoted, promoted[1]);
-                    pointers = promotePointers((*root), pointers);
+                    char *bottomPromoted = promoted[1];                       //  Auxiliar para pegar o nó promovido do segundo abaixo
+                    promoted = promoteVector((*root), promoted, promoted[1]); //  Auxiliar para pegar o nó promovido do segundo abaixo
+                    pointers = promotePointers((*root), pointers);            //  Auxiliar para pegar os ponteiros corretos
 
-                    newBottomRight = splitNode((*root)->P1, newBottomRight, aux);
-                    newTopperRight = splitNode(*root, newTopperRight, bottomPromoted);
-                    // newTopperRight
-                    // shiftPointers(newRoot, (*root), newTopperRight, whereToInsert(newRoot, bottomPromoted));
-                    shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted));
+                    newBottomRight = splitNode((*root)->P1, newBottomRight, aux);                                              // splita o nó debaixo
+                    newTopperRight = splitNode(*root, newTopperRight, bottomPromoted);                                         // Splita o nó de cima
+                    shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted)); // splita os ponteiros no formato de promoção
 
+                    // Nomeia os filhos e atribui o valor da raíz
                     newRoot->P1 = *root;
                     newRoot->P2 = newTopperRight;
                     newRoot->C1 = promoted[1];
-                    *root = newRoot;
-                    return NULL;
+                    *root = newRoot; // reestaura a nova raiz
+                    return NULL; // retorna NULL pois não promove nada
                 }
+                
+                // Caso seja um nó intermediário e tenha que fazer uma promoção
                 else
                 {
-                    BTreeNode *newBottomRight = initNode();
-                    BTreeNode *newTopperRight = initNode();
+                    BTreeNode *newBottomRight = initNode();     //  Inicializa o nó de baixo direito
+                    BTreeNode *newTopperRight = initNode();     //  Inicializa o nó de cima direito
 
-                    char *bottomPromoted = promoted[1];
-                    promoted = promoteVector((*root), promoted, promoted[1]);
-                    pointers = promotePointers((*root), pointers);
+                    char *bottomPromoted = promoted[1];     //  Pega o valor promovido idealmente para o nó superior
+                    promoted = promoteVector((*root), promoted, promoted[1]);   // Auxilia na promoção, vetor completo
+                    pointers = promotePointers((*root), pointers);   // Auxilia na promoção, ponteiros completos
 
-                    newBottomRight = splitNode((*root)->P1, newBottomRight, aux);
-                    newTopperRight = splitNode(*root, newTopperRight, bottomPromoted);
-                    // shiftPointers(newRoot, (*root), newTopperRight, whereToInsert(newRoot, bottomPromoted));
-                    shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted));
-                    newTopperRight->promoted_aux = promoted;
-                    return newTopperRight;
+                    newBottomRight = splitNode((*root)->P1, newBottomRight, aux);   //  Splita o o nó direito inferior
+                    newTopperRight = splitNode(*root, newTopperRight, bottomPromoted);   //  Splita o o nó direito Superior
+                    shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted));  //  Shifta os ponteiros para depois do split
+                    newTopperRight->promoted_aux = promoted;    // Atribui o vetor auxiliar para promoção 
+                    return newTopperRight;  //  Repassa o nó auxiliar
                 }
             }
-            return NULL;
+            return NULL;    // ou retorna nada caso não entre nos casos anteriores
         }
         else
         {
+            // Caso não seja um nó, será nó folha, se for, insere
             if (isAvailable((*root)->C3))
             {
-                shiftRightImplement(*root, aux, 1);
-                return NULL; //  Inserido corretamente sem precisar de promover
+                shiftRightImplement(*root, aux, 1); // Dá um shift correto na inserção, colocando-o no local correto
+                return NULL;                        //  Inserido corretamente sem precisar de promover
             }
+            // Caso esse nó folha também seja raiz, produz uma nova raíz
             else if (isRoot((*root), (*highestTree)))
             {
-                BTreeNode *newRoot = initNode();
-                BTreeNode *newRight = initNode();
-                promoted = promoteVector((*root), promoted, aux);
-                newRight = splitNode(*root, newRight, aux);
+                BTreeNode *newRoot = initNode();                  //  Inicializa um novo nó raiz
+                BTreeNode *newRight = initNode();                 //  Inicializa um novo nó direito
+                promoted = promoteVector((*root), promoted, aux); //  Vetor auxiliar para promoção
 
-                shiftPointers(newRoot, *root, newRight, whereToInsert(newRoot, promoted[1]));
+                newRight = splitNode(*root, newRight, aux); //  Splita o nó da direita
 
+                shiftPointers(newRoot, *root, newRight, whereToInsert(newRoot, promoted[1])); //  Shifta, dessa vez, os ponteiros no local correto
+
+                // Nomeia os filhos e atribui o valor da raíz
                 newRoot->P1 = *root;
                 newRoot->P2 = newRight;
                 newRoot->C1 = promoted[1];
-                *root = newRoot;
+                *root = newRoot; // reestaura a nova raiz
                 return NULL;
             }
+            // Caso não seja nem raíz nem um nó folha disponível, promove um novo nó direito com o dado promovido
             BTreeNode *newRight = initNode();
             newRight->promoted_aux = promoteVector((*root), promoted, aux);
             return newRight; // para caso tenha que dar split
         }
     }
-    /*
-           // Inserir na 2ª posição
-           else if (stringHigherThen(aux, (*root)->C1, 0) == 2 && stringHigherThen(aux, (*root)->C2, 0) == 1)
-           {
-               if (isNode((*root)->P2))
-               {
-                   if (insertIndexString(&(*root)->P2, aux, highestTree))
-                   {
-                       if (isAvailable((*root)->C3) == 1)
-                       {
-                           char *promoted = splitNode((*root), (*root)->P2, initNode(), aux);
-                           shiftRightImplement(*root, promoted, whereToInsert(*root, promoted));
-                           return 0;
-                       }
-                       else
-                           return 1;
-                   }
-                   return 0;
-               }
-               else
-               {
-                   if (isAvailable((*root)->C3))
-                   {
-                       shiftRightImplement(*root, aux, 2);
-                       return 0; //  Inserido corretamente sem precisar de promover
-                   }
-                   else if (isRoot((*root), (*highestTree)))
-                   {
-                       BTreeNode *newRoot = initNode();
-                       BTreeNode *newRight = initNode();
-                       splitNode(newRoot, *root, newRight, aux);
-                       newRoot->P1 = *root;
-                       newRoot->P2 = newRight;
-                       *root = newRoot;
-                   }
-                   return 1; // para caso tenha que dar split
-               }
-           }
-
-           // Inserir na 3ª posição
-           else if (stringHigherThen(aux, (*root)->C2, 0) == 2 && stringHigherThen(aux, (*root)->C3, 0) == 1)
-           {
-               if (isNode((*root)->P3))
-               {
-                   if (insertIndexString(&(*root)->P3, aux, highestTree))
-                   {
-                       if (isAvailable((*root)->C3) == 1)
-                       {
-                           char *promoted = splitNode((*root), (*root)->P3, initNode(), aux);
-                           shiftRightImplement(*root, promoted, whereToInsert(*root, promoted));
-                           return 0;
-                       }
-                       else
-                           return 1;
-                   }
-                   return 0;
-               }
-               else
-               {
-                   if (isAvailable((*root)->C3))
-                   {
-                       shiftRightImplement(*root, aux, 3);
-                       return 0; //  Inserido corretamente sem precisar de promover
-                   }
-                   else if (isRoot((*root), (*highestTree)))
-                   {
-                       BTreeNode *newRoot = initNode();
-                       BTreeNode *newRight = initNode();
-                       splitNode(newRoot, *root, newRight, aux);
-                       newRoot->P1 = *root;
-                       newRoot->P2 = newRight;
-                       *root = newRoot;
-                   }
-                   return 1; // para caso tenha que dar split
-               }
-           }
-
-           // Inserir na ultima posição
-           else if (stringHigherThen(aux, (*root)->C3, 0) == 2)
-       {
-           if (isNode((*root)->P4)) // teste para caso tenha filhos
-           {
-               if (char **promoted = insertIndexString(&(*root)->P4, aux, highestTree))
-               {
-                   if (isAvailable((*root)->C3) == 1)
-                   {
-                       BTreeNode *newRight = initNode();
-                       newRight = splitNode((*root), (*root)->P4, newRight, aux);
-                       shiftRightImplement(*root, promoted[1], whereToInsert(*root, promoted[1]));
-                       return 0;
-                   }
-                   else
-                   {
-                       if (isRoot((*root), (*highestTree)))
-                       {
-                           char *vector[4];
-
-                           BTreeNode *newRoot = initNode();
-
-                           // parte do nó de baixo
-                           BTreeNode *newRight = initNode();
-
-                           shiftRightImplement(newTopperRight, promoted, whereToInsert(newTopperRight, promoted));
-                           newTopperRight->P1 = (*root)->P4;
-                           newTopperRight->P2 = newRight;
-
-                           // parte do nó de cima
-
-                           char *promoted = splitNode(newRoot, (*root), newTopperRight, aux);
-                           shiftRightImplement(newRoot, promoted, whereToInsert(newTopperRight, promoted));
-
-                           *root = newRoot;
-                       }
-                       else
-                       {
-                           promoted
-                               BTreeNode *newRight = initNode();
-
-                           newRight = splitNode((*root), (*root)->P4, newRight, aux);
-                       }
-                       return 1;
-                   }
-               }
-               return 0;
-           }
-
-           else if (isRoot((*root), (*highestTree)))
-           {
-               BTreeNode *newRoot = initNode();
-               BTreeNode *newRight = initNode();
-               char *promoted = splitNode(newRoot, *root, newRight, aux);
-               newRoot->P1 = *root;
-               newRoot->P2 = newRight;
-               newRoot->C1 = strdup(promoted);
-               *root = newRoot;
-           }
-           else // É nó folha
-           {
-           }
-           return 1; // para caso tenha que dar split
-       }
-   */
-}
-/*
-int insertIndexStringBackUp(BTreeNode **root, char *aux, int *highestTree)
-{
-    if (*highestTree < heightTree((*root)))
-        *highestTree = heightTree((*root));
-
-    if ((*root)->C1 == NULL)
-    {
-        insertInPlace(*root, aux, 1);
-    }
-    // Não inserir pois é elemento repetido
-    else if (stringHigherThen(aux, (*root)->C1, 0) == 0 ||
-             stringHigherThen(aux, (*root)->C2, 0) == 0 ||
-             stringHigherThen(aux, (*root)->C3, 0) == 0)
-    {
-        printf("aux: %s não armazenado, eh igual um dos indices\n", aux);
-    }
-
-    // Inserir na 1ª posição
-    else if (stringHigherThen(aux, (*root)->C1, 0) == 1)
-    {
-        if (isNode((*root)->P1))
-        {
-            if (insertIndexString(&(*root)->P1, aux, highestTree))
-            {
-                if (isAvailable((*root)->C3) == 1)
-                {
-                    char *promoted = splitNode((*root), (*root)->P1, initNode(), aux);
-                    shiftRightImplement(*root, promoted, whereToInsert(*root, promoted));
-                    return 0;
-                }
-                else
-                    return 1;
-            }
-            return 0;
-        }
-        else
-        {
-            if (isAvailable((*root)->C3))
-            {
-                shiftRightImplement(*root, aux, 1);
-                return 0; //  Inserido corretamente sem precisar de promover
-            }
-            else if (isRoot((*root), (*highestTree)))
-            {
-                BTreeNode *newRoot = initNode();
-                BTreeNode *newRight = initNode();
-                splitNode(newRoot, *root, newRight, aux);
-                newRoot->P1 = *root;
-                newRoot->P2 = newRight;
-                *root = newRoot;
-            }
-            return 1; // para caso tenha que dar split
-        }
-    }
-
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
     // Inserir na 2ª posição
     else if (stringHigherThen(aux, (*root)->C1, 0) == 2 && stringHigherThen(aux, (*root)->C2, 0) == 1)
     {
-        if (isNode((*root)->P2))
+        if (isNode((*root)->P2)) // caso tenha um nó abaixo , repassa o código recursivo pra lá
         {
-            if (insertIndexString(&(*root)->P2, aux, highestTree))
+            // Caso o filho retorne um novo newRight, entra aqui para processar a promoção de dado
+            if (newRight = insertIndexString(&(*root)->P2, aux, highestTree))
             {
-                if (isAvailable((*root)->C3) == 1)
+                promoted = newRight->promoted_aux; // Usa a o auxiliar que vem junto com o nó promovido para pegar os dados promovidos
+
+                if (isAvailable((*root)->C3) == 1) // Se estiver disponível o nó pai, já coloca direto
                 {
-                    char *promoted = splitNode((*root), (*root)->P2, initNode(), aux);
-                    shiftRightImplement(*root, promoted, whereToInsert(*root, promoted));
-                    return 0;
+                    if (newRight->C1 == NULL) // Controle de promoção dupla, caso tenha, não entra
+                    {
+                        newRight = splitNode((*root)->P2, newRight, aux); // splita o nó da direita
+                    }
+                    shiftPointers((*root), (*root)->P2, newRight, whereToInsert((*root), promoted[1])); // shifta os ponteiros pro lugar correto
+
+                    shiftRightImplement(*root, promoted[1], whereToInsert(*root, promoted[1])); // Shift complementar que funciona apenas para promoções, rearranjando os ponteiros do split (P1, P2,P3,P4 e P5(na prática existe))
+                    return NULL;                                                                //  Retorna NULL pois não promove
                 }
+
+                else if (isRoot((*root), (*highestTree))) //  Caso seja raíz e esteja recebendo uma promoção de dados
+                {
+                    BTreeNode *newRoot = initNode();        //  Inicializa a nova raiz
+                    BTreeNode *newBottomRight = initNode(); //  Inicializa o novo nó direito superior
+                    BTreeNode *newTopperRight = initNode(); //  Inicializa o novo nó direito inferior
+
+                    char *bottomPromoted = promoted[1];                       //  Auxiliar para pegar o nó promovido do segundo abaixo
+                    promoted = promoteVector((*root), promoted, promoted[1]); //  Auxiliar para pegar o nó promovido do segundo abaixo
+                    pointers = promotePointers((*root), pointers);            //  Auxiliar para pegar os ponteiros corretos
+
+                    newBottomRight = splitNode((*root)->P2, newBottomRight, aux);                                              // splita o nó debaixo
+                    newTopperRight = splitNode(*root, newTopperRight, bottomPromoted);                                         // Splita o nó de cima
+                    shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted)); // splita os ponteiros no formato de promoção
+
+                    // Nomeia os filhos e atribui o valor da raíz
+                    newRoot->P1 = *root;
+                    newRoot->P2 = newTopperRight;
+                    newRoot->C1 = promoted[1];
+                    *root = newRoot; // reestaura a nova raiz
+                    return NULL; // retorna NULL pois não promove nada
+                }
+                
+                // Caso seja um nó intermediário e tenha que fazer uma promoção
                 else
-                    return 1;
+                {
+                    BTreeNode *newBottomRight = initNode();     //  Inicializa o nó de baixo direito
+                    BTreeNode *newTopperRight = initNode();     //  Inicializa o nó de cima direito
+
+                    char *bottomPromoted = promoted[1];     //  Pega o valor promovido idealmente para o nó superior
+                    promoted = promoteVector((*root), promoted, promoted[1]);   // Auxilia na promoção, vetor completo
+                    pointers = promotePointers((*root), pointers);   // Auxilia na promoção, ponteiros completos
+
+                    newBottomRight = splitNode((*root)->P2, newBottomRight, aux);   //  Splita o o nó direito inferior
+                    newTopperRight = splitNode(*root, newTopperRight, bottomPromoted);   //  Splita o o nó direito Superior
+                    shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted));  //  Shifta os ponteiros para depois do split
+                    newTopperRight->promoted_aux = promoted;    // Atribui o vetor auxiliar para promoção 
+                    return newTopperRight;  //  Repassa o nó auxiliar
+                }
             }
-            return 0;
+            return NULL;    // ou retorna nada caso não entre nos casos anteriores
         }
         else
         {
+            // Caso não seja um nó, será nó folha, se for, insere
             if (isAvailable((*root)->C3))
             {
-                shiftRightImplement(*root, aux, 2);
-                return 0; //  Inserido corretamente sem precisar de promover
+                shiftRightImplement(*root, aux, 1); // Dá um shift correto na inserção, colocando-o no local correto
+                return NULL;                        //  Inserido corretamente sem precisar de promover
             }
+            // Caso esse nó folha também seja raiz, produz uma nova raíz
             else if (isRoot((*root), (*highestTree)))
             {
-                BTreeNode *newRoot = initNode();
-                BTreeNode *newRight = initNode();
-                splitNode(newRoot, *root, newRight, aux);
+                BTreeNode *newRoot = initNode();                  //  Inicializa um novo nó raiz
+                BTreeNode *newRight = initNode();                 //  Inicializa um novo nó direito
+                promoted = promoteVector((*root), promoted, aux); //  Vetor auxiliar para promoção
+
+                newRight = splitNode(*root, newRight, aux); //  Splita o nó da direita
+
+                shiftPointers(newRoot, *root, newRight, whereToInsert(newRoot, promoted[1])); //  Shifta, dessa vez, os ponteiros no local correto
+
+                // Nomeia os filhos e atribui o valor da raíz
                 newRoot->P1 = *root;
                 newRoot->P2 = newRight;
-                *root = newRoot;
+                newRoot->C1 = promoted[1];
+                *root = newRoot; // reestaura a nova raiz
+                return NULL;
             }
-            return 1; // para caso tenha que dar split
+            // Caso não seja nem raíz nem um nó folha disponível, promove um novo nó direito com o dado promovido
+            BTreeNode *newRight = initNode();
+            newRight->promoted_aux = promoteVector((*root), promoted, aux);
+            return newRight; // para caso tenha que dar split
         }
     }
 
     // Inserir na 3ª posição
     else if (stringHigherThen(aux, (*root)->C2, 0) == 2 && stringHigherThen(aux, (*root)->C3, 0) == 1)
     {
-        if (isNode((*root)->P3))
+        if (isNode((*root)->P3)) // caso tenha um nó abaixo , repassa o código recursivo pra lá
         {
-            if (insertIndexString(&(*root)->P3, aux, highestTree))
+            // Caso o filho retorne um novo newRight, entra aqui para processar a promoção de dado
+            if (newRight = insertIndexString(&(*root)->P3, aux, highestTree))
             {
-                if (isAvailable((*root)->C3) == 1)
+                promoted = newRight->promoted_aux; // Usa a o auxiliar que vem junto com o nó promovido para pegar os dados promovidos
+
+                if (isAvailable((*root)->C3) == 1) // Se estiver disponível o nó pai, já coloca direto
                 {
-                    char *promoted = splitNode((*root), (*root)->P3, initNode(), aux);
-                    shiftRightImplement(*root, promoted, whereToInsert(*root, promoted));
-                    return 0;
+                    if (newRight->C1 == NULL) // Controle de promoção dupla, caso tenha, não entra
+                    {
+                        newRight = splitNode((*root)->P3, newRight, aux); // splita o nó da direita
+                    }
+                    shiftPointers((*root), (*root)->P3, newRight, whereToInsert((*root), promoted[1])); // shifta os ponteiros pro lugar correto
+
+                    shiftRightImplement(*root, promoted[1], whereToInsert(*root, promoted[1])); // Shift complementar que funciona apenas para promoções, rearranjando os ponteiros do split (P1, P2,P3,P4 e P5(na prática existe))
+                    return NULL;                                                                //  Retorna NULL pois não promove
                 }
+
+                else if (isRoot((*root), (*highestTree))) //  Caso seja raíz e esteja recebendo uma promoção de dados
+                {
+                    BTreeNode *newRoot = initNode();        //  Inicializa a nova raiz
+                    BTreeNode *newBottomRight = initNode(); //  Inicializa o novo nó direito superior
+                    BTreeNode *newTopperRight = initNode(); //  Inicializa o novo nó direito inferior
+
+                    char *bottomPromoted = promoted[1];                       //  Auxiliar para pegar o nó promovido do segundo abaixo
+                    promoted = promoteVector((*root), promoted, promoted[1]); //  Auxiliar para pegar o nó promovido do segundo abaixo
+                    pointers = promotePointers((*root), pointers);            //  Auxiliar para pegar os ponteiros corretos
+
+                    newBottomRight = splitNode((*root)->P3, newBottomRight, aux);                                              // splita o nó debaixo
+                    newTopperRight = splitNode(*root, newTopperRight, bottomPromoted);                                         // Splita o nó de cima
+                    shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted)); // splita os ponteiros no formato de promoção
+
+                    // Nomeia os filhos e atribui o valor da raíz
+                    newRoot->P1 = *root;
+                    newRoot->P2 = newTopperRight;
+                    newRoot->C1 = promoted[1];
+                    *root = newRoot; // reestaura a nova raiz
+                    return NULL; // retorna NULL pois não promove nada
+                }
+                
+                // Caso seja um nó intermediário e tenha que fazer uma promoção
                 else
-                    return 1;
+                {
+                    BTreeNode *newBottomRight = initNode();     //  Inicializa o nó de baixo direito
+                    BTreeNode *newTopperRight = initNode();     //  Inicializa o nó de cima direito
+
+                    char *bottomPromoted = promoted[1];     //  Pega o valor promovido idealmente para o nó superior
+                    promoted = promoteVector((*root), promoted, promoted[1]);   // Auxilia na promoção, vetor completo
+                    pointers = promotePointers((*root), pointers);   // Auxilia na promoção, ponteiros completos
+
+                    newBottomRight = splitNode((*root)->P3, newBottomRight, aux);   //  Splita o o nó direito inferior
+                    newTopperRight = splitNode(*root, newTopperRight, bottomPromoted);   //  Splita o o nó direito Superior
+                    shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted));  //  Shifta os ponteiros para depois do split
+                    newTopperRight->promoted_aux = promoted;    // Atribui o vetor auxiliar para promoção 
+                    return newTopperRight;  //  Repassa o nó auxiliar
+                }
             }
-            return 0;
+            return NULL;    // ou retorna nada caso não entre nos casos anteriores
         }
         else
         {
+            // Caso não seja um nó, será nó folha, se for, insere
             if (isAvailable((*root)->C3))
             {
-                shiftRightImplement(*root, aux, 3);
-                return 0; //  Inserido corretamente sem precisar de promover
+                shiftRightImplement(*root, aux, 1); // Dá um shift correto na inserção, colocando-o no local correto
+                return NULL;                        //  Inserido corretamente sem precisar de promover
             }
+            // Caso esse nó folha também seja raiz, produz uma nova raíz
             else if (isRoot((*root), (*highestTree)))
             {
-                BTreeNode *newRoot = initNode();
-                BTreeNode *newRight = initNode();
-                splitNode(newRoot, *root, newRight, aux);
+                BTreeNode *newRoot = initNode();                  //  Inicializa um novo nó raiz
+                BTreeNode *newRight = initNode();                 //  Inicializa um novo nó direito
+                promoted = promoteVector((*root), promoted, aux); //  Vetor auxiliar para promoção
+
+                newRight = splitNode(*root, newRight, aux); //  Splita o nó da direita
+
+                shiftPointers(newRoot, *root, newRight, whereToInsert(newRoot, promoted[1])); //  Shifta, dessa vez, os ponteiros no local correto
+
+                // Nomeia os filhos e atribui o valor da raíz
                 newRoot->P1 = *root;
                 newRoot->P2 = newRight;
-                *root = newRoot;
+                newRoot->C1 = promoted[1];
+                *root = newRoot; // reestaura a nova raiz
+                return NULL;
             }
-            return 1; // para caso tenha que dar split
+            // Caso não seja nem raíz nem um nó folha disponível, promove um novo nó direito com o dado promovido
+            BTreeNode *newRight = initNode();
+            newRight->promoted_aux = promoteVector((*root), promoted, aux);
+            return newRight; // para caso tenha que dar split
         }
     }
 
     // Inserir na ultima posição
     else if (stringHigherThen(aux, (*root)->C3, 0) == 2)
-    {
-        if (isNode((*root)->P4))
+   {
+        if (isNode((*root)->P4)) // caso tenha um nó abaixo , repassa o código recursivo pra lá
         {
-            if (insertIndexString(&(*root)->P4, aux, highestTree))
+            // Caso o filho retorne um novo newRight, entra aqui para processar a promoção de dado
+            if (newRight = insertIndexString(&(*root)->P4, aux, highestTree))
             {
-                if (isAvailable((*root)->C3) == 1)
+                promoted = newRight->promoted_aux; // Usa a o auxiliar que vem junto com o nó promovido para pegar os dados promovidos
+
+                if (isAvailable((*root)->C3) == 1) // Se estiver disponível o nó pai, já coloca direto
                 {
-                    splitNode((*root), (*root)->P4, initNode(), aux);
-                    shiftRightImplement(*root, (*root)->P4->promote_aux, whereToInsert(*root, (*root)->P4->promote_aux));
-                    return 0;
+                    if (newRight->C1 == NULL) // Controle de promoção dupla, caso tenha, não entra
+                    {
+                        newRight = splitNode((*root)->P4, newRight, aux); // splita o nó da direita
+                    }
+                    shiftPointers((*root), (*root)->P4, newRight, whereToInsert((*root), promoted[1])); // shifta os ponteiros pro lugar correto
+
+                    shiftRightImplement(*root, promoted[1], whereToInsert(*root, promoted[1])); // Shift complementar que funciona apenas para promoções, rearranjando os ponteiros do split (P1, P2,P3,P4 e P5(na prática existe))
+                    return NULL;                                                                //  Retorna NULL pois não promove
                 }
+
+                else if (isRoot((*root), (*highestTree))) //  Caso seja raíz e esteja recebendo uma promoção de dados
+                {
+                    BTreeNode *newRoot = initNode();        //  Inicializa a nova raiz
+                    BTreeNode *newBottomRight = initNode(); //  Inicializa o novo nó direito superior
+                    BTreeNode *newTopperRight = initNode(); //  Inicializa o novo nó direito inferior
+
+                    char *bottomPromoted = promoted[1];                       //  Auxiliar para pegar o nó promovido do segundo abaixo
+                    promoted = promoteVector((*root), promoted, promoted[1]); //  Auxiliar para pegar o nó promovido do segundo abaixo
+                    pointers = promotePointers((*root), pointers);            //  Auxiliar para pegar os ponteiros corretos
+
+                    newBottomRight = splitNode((*root)->P4, newBottomRight, aux);                                              // splita o nó debaixo
+                    newTopperRight = splitNode(*root, newTopperRight, bottomPromoted);                                         // Splita o nó de cima
+                    shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted)); // splita os ponteiros no formato de promoção
+
+                    // Nomeia os filhos e atribui o valor da raíz
+                    newRoot->P1 = *root;
+                    newRoot->P2 = newTopperRight;
+                    newRoot->C1 = promoted[1];
+                    *root = newRoot; // reestaura a nova raiz
+                    return NULL; // retorna NULL pois não promove nada
+                }
+                
+                // Caso seja um nó intermediário e tenha que fazer uma promoção
                 else
                 {
-                    if (isRoot((*root), (*highestTree)))
-                    {
-                        char *vector[4];
+                    BTreeNode *newBottomRight = initNode();     //  Inicializa o nó de baixo direito
+                    BTreeNode *newTopperRight = initNode();     //  Inicializa o nó de cima direito
 
-                        BTreeNode *newRoot = initNode();
+                    char *bottomPromoted = promoted[1];     //  Pega o valor promovido idealmente para o nó superior
+                    promoted = promoteVector((*root), promoted, promoted[1]);   // Auxilia na promoção, vetor completo
+                    pointers = promotePointers((*root), pointers);   // Auxilia na promoção, ponteiros completos
 
-                        // parte do nó de baixo
-                        BTreeNode *newRight = initNode();
-
-                        shiftRightImplement(newTopperRight, promoted, whereToInsert(newTopperRight, promoted));
-                        newTopperRight->P1 = (*root)->P4;
-                        newTopperRight->P2 = newRight;
-
-                        // parte do nó de cima
-
-                        char *promoted = splitNode(newRoot, (*root), newTopperRight, aux);
-                        shiftRightImplement(newRoot, promoted, whereToInsert(newTopperRight, promoted));
-
-                        *root = newRoot;
-                    }
-                    else
-                    {
-                        BTreeNode *newRight = initNode();
-
-                        newRight = splitNode((*root), (*root)->P4, newRight, aux);
-                    }
-                    return 1;
+                    newBottomRight = splitNode((*root)->P4, newBottomRight, aux);   //  Splita o o nó direito inferior
+                    newTopperRight = splitNode(*root, newTopperRight, bottomPromoted);   //  Splita o o nó direito Superior
+                    shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted));  //  Shifta os ponteiros para depois do split
+                    newTopperRight->promoted_aux = promoted;    // Atribui o vetor auxiliar para promoção 
+                    return newTopperRight;  //  Repassa o nó auxiliar
                 }
             }
-            return 0;
+            return NULL;    // ou retorna nada caso não entre nos casos anteriores
         }
         else
         {
-            // vai direto pro teste da raíz, pois nunca terá como olocar, já está em C3 oc
-            if (isRoot((*root), (*highestTree)))
+            // Caso não seja um nó, será nó folha, se for, insere
+            if (isAvailable((*root)->C3))
             {
-                BTreeNode *newRoot = initNode();
-                BTreeNode *newRight = initNode();
-                char *promoted = splitNode(newRoot, *root, newRight, aux);
+                shiftRightImplement(*root, aux, 1); // Dá um shift correto na inserção, colocando-o no local correto
+                return NULL;                        //  Inserido corretamente sem precisar de promover
+            }
+            // Caso esse nó folha também seja raiz, produz uma nova raíz
+            else if (isRoot((*root), (*highestTree)))
+            {
+                BTreeNode *newRoot = initNode();                  //  Inicializa um novo nó raiz
+                BTreeNode *newRight = initNode();                 //  Inicializa um novo nó direito
+                promoted = promoteVector((*root), promoted, aux); //  Vetor auxiliar para promoção
+
+                newRight = splitNode(*root, newRight, aux); //  Splita o nó da direita
+
+                shiftPointers(newRoot, *root, newRight, whereToInsert(newRoot, promoted[1])); //  Shifta, dessa vez, os ponteiros no local correto
+
+                // Nomeia os filhos e atribui o valor da raíz
                 newRoot->P1 = *root;
                 newRoot->P2 = newRight;
-                newRoot->C1 = strdup(promoted);
-                *root = newRoot;
+                newRoot->C1 = promoted[1];
+                *root = newRoot; // reestaura a nova raiz
+                return NULL;
             }
-            return 1; // para caso tenha que dar split
+            // Caso não seja nem raíz nem um nó folha disponível, promove um novo nó direito com o dado promovido
+            BTreeNode *newRight = initNode();
+            newRight->promoted_aux = promoteVector((*root), promoted, aux);
+            return newRight; // para caso tenha que dar split
         }
     }
 }
-*/
+
 void insertIndex(BTreeNode *root, Dados *dados)
 {
     int stringConcatMaxSize = strlen(dados->nomeTecnologiaDestino.string) + strlen(dados->nomeTecnologiaOrigem.string) + 1; //  Para se concatenar, achas-se o tamanho total da string concatenada
