@@ -357,9 +357,11 @@ int isRoot(BTreeNode *root, int highestTree)
 }
 
 /* Testa e insere o dado dentro do arquivo de index */
-char **insertIndexString(BTreeNode **root, char *aux, int *highestTree)
+BTreeNode *insertIndexString(BTreeNode **root, char *aux, int *highestTree)
 {
     char **promoted = (char **)malloc(4 * sizeof(char *));
+    BTreeNode *newRight = initNode();
+
     BTreeNode **pointers = (BTreeNode **)malloc(4 * sizeof(BTreeNode *));
     if (*highestTree < heightTree((*root)))
         *highestTree = heightTree((*root));
@@ -381,13 +383,16 @@ char **insertIndexString(BTreeNode **root, char *aux, int *highestTree)
     {
         if (isNode((*root)->P1))
         {
-            if (promoted = insertIndexString(&(*root)->P1, aux, highestTree))
+            if (newRight = insertIndexString(&(*root)->P1, aux, highestTree))
             {
+                promoted = newRight->promoted_aux;
+
                 if (isAvailable((*root)->C3) == 1)
                 {
-                    BTreeNode *newRight = initNode();
-
-                    newRight = splitNode((*root)->P1, newRight, aux);
+                    if (newRight->C1 == NULL)
+                    {
+                        newRight = splitNode((*root)->P1, newRight, aux);
+                    }
                     shiftPointers((*root), (*root)->P1, newRight, whereToInsert((*root), promoted[1]));
 
                     shiftRightImplement(*root, promoted[1], whereToInsert(*root, promoted[1]));
@@ -424,12 +429,12 @@ char **insertIndexString(BTreeNode **root, char *aux, int *highestTree)
                     promoted = promoteVector((*root), promoted, promoted[1]);
                     pointers = promotePointers((*root), pointers);
 
-                    newBottomRight = splitNode( (*root)->P1, newBottomRight, aux);
+                    newBottomRight = splitNode((*root)->P1, newBottomRight, aux);
                     newTopperRight = splitNode(*root, newTopperRight, bottomPromoted);
                     // shiftPointers(newRoot, (*root), newTopperRight, whereToInsert(newRoot, bottomPromoted));
                     shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted));
-
-                    return promoted;
+                    newTopperRight->promoted_aux = promoted;
+                    return newTopperRight;
                 }
             }
             return NULL;
@@ -446,7 +451,7 @@ char **insertIndexString(BTreeNode **root, char *aux, int *highestTree)
                 BTreeNode *newRoot = initNode();
                 BTreeNode *newRight = initNode();
                 promoted = promoteVector((*root), promoted, aux);
-                newRight = splitNode( *root, newRight, aux);
+                newRight = splitNode(*root, newRight, aux);
 
                 shiftPointers(newRoot, *root, newRight, whereToInsert(newRoot, promoted[1]));
 
@@ -456,8 +461,9 @@ char **insertIndexString(BTreeNode **root, char *aux, int *highestTree)
                 *root = newRoot;
                 return NULL;
             }
-            promoted = promoteVector((*root), promoted, aux);
-            return promoted; // para caso tenha que dar split
+            BTreeNode *newRight = initNode();
+            newRight->promoted_aux = promoteVector((*root), promoted, aux);
+            return newRight; // para caso tenha que dar split
         }
     }
     /*
