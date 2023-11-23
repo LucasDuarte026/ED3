@@ -2,17 +2,17 @@
 #include "B-Tree.h"
 #include "func3.h"
 
-void insertIndex(BTreeNode **root, Dados *dados, int *highestTree, int RRN)
+void insertIndex(FILE *bin_index, Dados *dados, int *highestTree, int *nodeRRN) // Testa e insere o dado dentro do arquivo de index
 {
     int stringConcatMaxSize = strlen(dados->nomeTecnologiaDestino.string) + strlen(dados->nomeTecnologiaOrigem.string) + 1; //  Para se concatenar, achas-se o tamanho total da string concatenada
     char aux[stringConcatMaxSize];                                                                                          //  Cria um auxiliar para guardar tal string concatenada
     strcpy(aux, dados->nomeTecnologiaOrigem.string);                                                                        // Copia origem na aux
-    strcat(aux, dados->nomeTecnologiaDestino.string);                                                                       // Concatena com destino
-    printf("%s\n", aux);
-    insertIndexString(root, aux, highestTree, RRN);
+    strcat(aux, dados->nomeTecnologiaDestino.string);
+    // printf("%s\n", aux); // Concatena com destino
+    insertIndexString(bin_index, aux, highestTree, nodeRRN);
 }
 
-static Dados *lerRegistro(FILE *bin, Dados *dados) // Lê o registro completo e armazena em dados
+Dados *getRegister(FILE *bin, Dados *dados) // Lê o registro completo e armazena em dados
 {
     fread(&dados->grupo, sizeof(int), 1, bin);
     fread(&dados->popularidade, sizeof(int), 1, bin);
@@ -30,14 +30,14 @@ static Dados *lerRegistro(FILE *bin, Dados *dados) // Lê o registro completo e 
 
     return dados;
 }
-
+/*
 void updateTreeValues(BTreeNode **root)
 {
     BTreeNode *ptr_root = (*root);
 
-    ptr_root->data.alturaNo = heightTree(ptr_root);
-    ptr_root->data.nroChavesNo = keysQuant(ptr_root);
-    printf("altura: |%2d| e quant key: |%d|\n", ptr_root->data.alturaNo, ptr_root->data.nroChavesNo);
+    ptr_root->alturaNo = heightTree(ptr_root);
+    ptr_root->nroChavesNo = keysQuant(ptr_root);
+    // printf("altura: |%2d| e quant key: |%d|\n", ptr_root->data.alturaNo, ptr_root->data.nroChavesNo);
     // Repassar a funcção recursiva aos filhos
     if (ptr_root->P1)
     {
@@ -56,6 +56,54 @@ void updateTreeValues(BTreeNode **root)
         updateTreeValues(&ptr_root->P4);
     }
 }
+*/
+
+void insertFirstRoot(FILE *bin_index)
+{
+    char aux = '$';
+    BTreeNode *newRoot = initNode();
+    newRoot->alturaNo = 75;
+    fwrite(&newRoot->nroChavesNo, sizeof(int), 1, bin_index);
+    fwrite(&newRoot->alturaNo, sizeof(int), 1, bin_index);
+    fwrite(&newRoot->RRNdoNo, sizeof(int), 1, bin_index);
+    fwrite(&newRoot->P1, sizeof(int), 1, bin_index);
+    for (int i = 0; i < 55; i++)
+    {
+        fwrite(&aux, sizeof(char), 1, bin_index);
+    }
+    fwrite(&newRoot->PR1, sizeof(int), 1, bin_index);
+    fwrite(&newRoot->P2, sizeof(int), 1, bin_index);
+
+    for (int i = 0; i < 55; i++)
+    {
+        fwrite(&aux, sizeof(char), 1, bin_index);
+    }
+    fwrite(&newRoot->PR2, sizeof(int), 1, bin_index);
+    fwrite(&newRoot->P3, sizeof(int), 1, bin_index);
+
+    for (int i = 0; i < 55; i++)
+    {
+        fwrite(&aux, sizeof(char), 1, bin_index);
+    }
+    fwrite(&newRoot->PR3, sizeof(int), 1, bin_index);
+    fwrite(&newRoot->P4, sizeof(int), 1, bin_index);
+}
+
+void initHeader(FILE *bin_index)
+{
+    Header header;
+    header.status = '0';
+    header.rootNode = 0;
+    header.RRNnextNode = 0;
+    fwrite(&header.status, sizeof(char), 1, bin_index);
+    fwrite(&header.rootNode, sizeof(int), 1, bin_index);
+    fwrite(&header.RRNnextNode, sizeof(int), 1, bin_index);
+    for (int i = 0; i < 196; i++)
+    {
+        header.garbage[i] = '$';
+        fwrite(&header.garbage[i], sizeof(char), 1, bin_index); // pular os 196 lixos
+    }
+}
 
 void functionality_5(char *binArchiveName, char *outArchiveName)
 {
@@ -72,9 +120,6 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
         return; // Caso o bin não seja encontrado ou o bin_index não criado
     }
 
-    BTreeNode *root;
-    root = initNode(root);
-
     //  inicializa o cabeçalho
     Cabecalho cabecalho;
     fread(&cabecalho.status, sizeof(char), 1, bin);
@@ -88,10 +133,16 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
         fclose(bin);
         return;
     }
+
+    //  inicializa o cabeçalho do arquivo de indice
+
+    initHeader(bin_index);
+    insertFirstRoot(bin_index);
+
     Dados dados;
     int encontrado = 0;  // para testar registro inexistente
     int highestTree = 0; // para testar registro inexistente
-    int RRN = 1;
+    int nodeRRN = 0;
     fseek(bin, TAM_CABECALHO, SEEK_SET); //  Para pular o cabeçalho
 
     // le tudo do registro desejado a seguir
@@ -101,18 +152,22 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
         if (dados.removido == '0')
         {
 
-            dados = *lerRegistro(bin, &dados);
-            printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
+            dados = *getRegister(bin, &dados);
+            // printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
+            insertIndex(bin_index, &dados, &highestTree, &nodeRRN);
+            // updateTreeValues(&root);
+            // printf("\n");
+            // treePrint(&root);
+            // printf("\n");
+            // writeIndexFile();
 
-            insertIndex(&root, &dados, &highestTree,RRN);
             free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
             free(dados.nomeTecnologiaDestino.string);
             encontrado = 1;
-            RRN++;
         }
         else if (dados.removido == '1')
         {
-            RRN++;
+            nodeRRN++;
             fseek(bin, TAM_REGISTRO, SEEK_CUR); // Pula o registro removido            }
         }
     }
@@ -120,8 +175,7 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
     { // registro inexistente
         printf("Falha no processamento do arquivo.\n");
     }
-
-    updateTreeValues(&root);
+    // treePrint(&root);
 
     fclose(bin);
     fclose(bin_index);
