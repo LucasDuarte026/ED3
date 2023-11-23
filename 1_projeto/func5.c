@@ -2,14 +2,14 @@
 #include "B-Tree.h"
 #include "func3.h"
 
-void insertIndex(FILE *bin_index, Dados *dados, int *highestTree, int *nodeRRN) // Testa e insere o dado dentro do arquivo de index
+void insertIndex(FILE *bin_index, Dados *dados, int *highestTree, int *nodeRRN, int referenceRRN) // Testa e insere o dado dentro do arquivo de index
 {
     int stringConcatMaxSize = strlen(dados->nomeTecnologiaDestino.string) + strlen(dados->nomeTecnologiaOrigem.string) + 1; //  Para se concatenar, achas-se o tamanho total da string concatenada
     char aux[stringConcatMaxSize];                                                                                          //  Cria um auxiliar para guardar tal string concatenada
     strcpy(aux, dados->nomeTecnologiaOrigem.string);                                                                        // Copia origem na aux
     strcat(aux, dados->nomeTecnologiaDestino.string);
     // printf("%s\n", aux); // Concatena com destino
-    insertIndexString(bin_index, aux, highestTree, nodeRRN);
+    insertIndexString(bin_index, aux, highestTree, nodeRRN, referenceRRN);
 }
 
 Dados *getRegister(FILE *bin, Dados *dados) // Lê o registro completo e armazena em dados
@@ -62,7 +62,9 @@ void insertFirstRoot(FILE *bin_index)
 {
     char aux = '$';
     BTreeNode *newRoot = initNode();
-    newRoot->alturaNo = 75;
+    newRoot->alturaNo = -1;
+    newRoot->RRNdoNo = -1;
+    newRoot->nroChavesNo = -1;
     fwrite(&newRoot->nroChavesNo, sizeof(int), 1, bin_index);
     fwrite(&newRoot->alturaNo, sizeof(int), 1, bin_index);
     fwrite(&newRoot->RRNdoNo, sizeof(int), 1, bin_index);
@@ -137,24 +139,24 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
     //  inicializa o cabeçalho do arquivo de indice
 
     initHeader(bin_index);
-    insertFirstRoot(bin_index);
+    // insertFirstRoot(bin_index);
 
     Dados dados;
-    int encontrado = 0;  // para testar registro inexistente
-    int highestTree = 0; // para testar registro inexistente
-    int nodeRRN = 0;
+    int encontrado = 0;                  // para testar registro inexistente
+    int highestTree = 0;                 // Valor da atual altura maxima da arvore
+    int nodeRRN = 0;                     // Contador para os nós inseridos
+    int referenceRRN = 0;                // Contador para os nós inseridos
     fseek(bin, TAM_CABECALHO, SEEK_SET); //  Para pular o cabeçalho
 
     // le tudo do registro desejado a seguir
-    while (!feof(bin))
+    while (fread(&dados.removido, sizeof(char), 1, bin))
     {
-        fread(&dados.removido, sizeof(char), 1, bin);
         if (dados.removido == '0')
         {
 
             dados = *getRegister(bin, &dados);
             // printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
-            insertIndex(bin_index, &dados, &highestTree, &nodeRRN);
+            insertIndex(bin_index, &dados, &highestTree, &nodeRRN, referenceRRN);
             // updateTreeValues(&root);
             // printf("\n");
             // treePrint(&root);
@@ -167,8 +169,10 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
         }
         else if (dados.removido == '1')
         {
-            nodeRRN++;
-            fseek(bin, TAM_REGISTRO, SEEK_CUR); // Pula o registro removido            }
+            fseek(bin, TAM_REGISTRO - 1, SEEK_CUR); // Pula o registro removido            }
+        }
+        if(encontrado){
+            return;
         }
     }
     if (!encontrado)

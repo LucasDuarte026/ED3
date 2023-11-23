@@ -31,55 +31,52 @@ BTreeNode *initNode()
 
     return newNode;
 }
-/*
-int heightTree(BTreeNode *root)
+
+int heightTree(FILE *bin_index, BTreeNode *node)
 {
-
     int height = 0;
-    if (root == NULL)
+    BTreeNode *sonNode = initNode();
+
+    if (node->P1 != -1)
     {
-        return 0;
+        sonNode = readIndexRegister(bin_index, sonNode, node->P1);
+        int childHeight = heightTree(bin_index, sonNode);
+        if (childHeight > height)
+        {
+            height = childHeight;
+        }
     }
-    else
+    if (node->P2 != -1)
     {
-        if (root->P1 != NULL)
-        {
-            int chilhdHeight = heightTree(root->P1);
-            if (chilhdHeight > height)
-            {
-                height = chilhdHeight;
-            }
-        }
-        if (root->P2 != NULL)
-        {
-            int chilhdHeight = heightTree(root->P2);
-            if (chilhdHeight > height)
-            {
-                height = chilhdHeight;
-            }
-        }
+        sonNode = readIndexRegister(bin_index, sonNode, node->P2);
 
-        if (root->P3 != NULL)
+        int childHeight = heightTree(bin_index, sonNode);
+        if (childHeight > height)
         {
-            int chilhdHeight = heightTree(root->P3);
-            if (chilhdHeight > height)
-            {
-                height = chilhdHeight;
-            }
+            height = childHeight;
         }
-
-        if (root->P4 != NULL)
+    }
+    if (node->P3 != -1)
+    {
+        sonNode = readIndexRegister(bin_index, sonNode, node->P2);
+        int childHeight = heightTree(bin_index, sonNode);
+        if (childHeight > height)
         {
-            int chilhdHeight = heightTree(root->P4);
-            if (chilhdHeight > height)
-            {
-                height = chilhdHeight;
-            }
+            height = childHeight;
+        }
+    }
+    if (node->P4 != -1)
+    {
+        sonNode = readIndexRegister(bin_index, sonNode, node->P4);
+        int childHeight = heightTree(bin_index, sonNode);
+        if (childHeight > height)
+        {
+            height = childHeight;
         }
     }
     return height + 1;
 }
-*/
+
 static int isAvailable(char *text)
 {
     if (text)
@@ -90,18 +87,21 @@ static int isAvailable(char *text)
 }
 
 /* Insere o valor de fato no local pedido */
-static void insertInPlace(BTreeNode *node, char *aux, int place)
+static void insertInPlace(BTreeNode *node, char *aux,int referenceRRN, int place)
 {
     switch (place)
     {
     case 1:
         node->C1 = strdup(aux);
+        node->PR1 = referenceRRN;
         break;
     case 2:
         node->C2 = strdup(aux);
+        node->PR2 = referenceRRN;
         break;
     case 3:
         node->C3 = strdup(aux);
+        node->PR3 = referenceRRN;
         break;
     default:
         break;
@@ -433,20 +433,6 @@ BTreeNode *readIndexRegister(FILE *bin_index, BTreeNode *prt_root, int RRN)
     return prt_root;
 }
 
-BTreeNode *getFileNode(FILE *bin_index, int place)
-{
-
-    fseek(bin_index, 0, SEEK_SET);
-    Header header;
-    fread(&header.status, sizeof(char), 1, bin_index);
-    fread(&header.rootNode, sizeof(int), 1, bin_index);
-
-    int newLocal = header.rootNode;
-    BTreeNode *ptr_root;
-
-    return ptr_root;
-}
-
 BTreeNode *getRoot(FILE *bin_index)
 {
     BTreeNode *ptr_root = initNode();
@@ -457,7 +443,7 @@ BTreeNode *getRoot(FILE *bin_index)
     fread(&header.rootNode, sizeof(int), 1, bin_index); // lê a raiz
 
     int rootLocal = header.rootNode; // pega o destino da raiz
-    
+
     ptr_root = readIndexRegister(bin_index, ptr_root, rootLocal);
     return ptr_root;
 }
@@ -563,27 +549,94 @@ acessorNormal()
 */
 void updateBinArchive(FILE *bin_index, BTreeNode *node)
 {
-    BTreeNode *root = getRoot(bin_index);
-    if (root->P1 != -1)
+
+    node->nroChavesNo = keysQuant(node);
+    node->alturaNo = heightTree(bin_index, node);
+    char aux = '$';
+
+    fseek(bin_index, 0, SEEK_END);
+    fwrite(&node->nroChavesNo, sizeof(int), 1, bin_index);
+    fwrite(&node->alturaNo, sizeof(int), 1, bin_index);
+    fwrite(&node->RRNdoNo, sizeof(int), 1, bin_index);
+
+    fwrite(&node->P1, sizeof(int), 1, bin_index);
+    int teste = 1;
+    for (int i = 0; i < 55; i++)
     {
-        updateBinArchive(bin_index, getFileNode(bin_index, root->P1));
+        if (node->C1 == NULL || teste == 0)
+        {
+            teste = 0;
+            fwrite(&aux, sizeof(char), 1, bin_index);
+        }
+        if (teste)
+        {
+            if (node->C1[i] == '\0')
+                teste = 0;
+        }
+        if (teste)
+        {
+            fwrite(&node->C1[i], sizeof(char), 1, bin_index);
+        }
     }
-    updateBinArchive(bin_index, getFileNode(bin_index, root->P1));
+    fwrite(&node->PR1, sizeof(int), 1, bin_index);
+    fwrite(&node->P2, sizeof(int), 1, bin_index);
+
+    for (int i = 0; i < 55; i++)
+    {
+        if (node->C2 == NULL || teste == 0)
+        {
+            teste = 0;
+            fwrite(&aux, sizeof(char), 1, bin_index);
+        }
+        if (teste)
+        {
+            if (node->C2[i] == '\0')
+                teste = 0;
+        }
+        if (teste)
+        {
+            fwrite(&node->C1[i], sizeof(char), 1, bin_index);
+        }
+    }
+    fwrite(&node->PR2, sizeof(int), 1, bin_index);
+    fwrite(&node->P3, sizeof(int), 1, bin_index);
+
+    for (int i = 0; i < 55; i++)
+    {
+        if (node->C1 == NULL || teste == 0)
+        {
+            teste = 0;
+            fwrite(&aux, sizeof(char), 1, bin_index);
+        }
+        if (teste)
+        {
+            if (node->C1[i] == '\0')
+                teste = 0;
+        }
+        if (teste)
+        {
+            fwrite(&node->C1[i], sizeof(char), 1, bin_index);
+        }
+    }
+    fwrite(&node->PR3, sizeof(int), 1, bin_index);
+    fwrite(&node->P4, sizeof(int), 1, bin_index);
 }
 
 /* Testa e insere o dado dentro do arquivo de index */
-BTreeNode *insertIndexString(FILE *bin_index, char *aux, int *highestTree, int *nodeRRN)
+BTreeNode *insertIndexString(FILE *bin_index, char *aux, int *highestTree, int *nodeRRN, int referenceRRN)
 {
-    char **promoted = (char **)malloc(4 * sizeof(char *));
-    BTreeNode *newRight = initNode();
+    // char **promoted = (char **)malloc(4 * sizeof(char *));
+    char promoted[4][55];
+
+    // BTreeNode *newRight = initNode();
     BTreeNode *root = getRoot(bin_index);
-    /*
-        if (*highestTree < heightTree(root))
-            *highestTree = heightTree(root);
-    */
+    if (root->alturaNo == -1)
+        root = initNode();
+    if (*highestTree < heightTree(bin_index, root))
+        *highestTree = heightTree(bin_index, root);
     if (root->C1 == NULL)
     {
-        insertInPlace(root, aux, 1);
+        insertInPlace(root, aux,referenceRRN, 1);
         root->RRNdoNo = *nodeRRN;
         (*nodeRRN)++;
         updateBinArchive(bin_index, root);
