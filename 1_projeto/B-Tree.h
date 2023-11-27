@@ -10,5 +10,6 @@ int keysQuant(BTreeNode *node);                                                 
 BTreeNode *getRoot(FILE *bin_index);
 int whereToInsert(BTreeNode *node, char *aux);
 BTreeNode *readIndexRegister(FILE *bin_index, BTreeNode *prt_root, int RRN);
+void updateHeader(FILE *bin_index, char status, int rootNodeRRN, int *nodeRRN);
 
 #endif

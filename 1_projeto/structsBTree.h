@@ -82,16 +82,15 @@ typedef struct BTreeNode
     int RRNdoNo;
 
     int P1;
-    char *C1;
+    char C1[55];
     int PR1;
     int P2;
-    char *C2;
+    char C2[55];
     int PR2;
     int P3;
-    char *C3;
+    char C3[55];
     int PR3;
     int P4;
-    
     char **promoted_aux;
 
 } BTreeNode;

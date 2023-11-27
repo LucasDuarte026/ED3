@@ -162,7 +162,7 @@ int main()
         binArchiveName = argumento_2;
         N = atoi(argumento_3);
 
-        functionality_6(binRegName, binArchiveName,N );
+        functionality_6(binRegName, binArchiveName, N);
     case '7':
     case '8':
 
