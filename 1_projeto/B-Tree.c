@@ -629,19 +629,18 @@ BTreeNode *readIndexRegister(FILE *bin_index, BTreeNode *prt_root, int RRN)
     return prt_root;
 }
 
-BTreeNode *getRoot(FILE *bin_index)
+BTreeNode *getRoot(FILE *bin_index, BTreeNode *root)
 {
-    BTreeNode *ptr_root = initNode();
 
     fseek(bin_index, 0, SEEK_SET); // Vai pro começo do arquivo
-    Header header;
-    fread(&header.status, sizeof(char), 1, bin_index);
-    fread(&header.rootNode, sizeof(int), 1, bin_index); // lê a raiz
+    fseek(bin_index, 0, SEEK_SET); // Vai pro começo do arquivo
+    char status;
+    int rootNodeValue;
+    fread(&status, sizeof(char), 1, bin_index);
+    fread(&rootNodeValue, sizeof(int), 1, bin_index); // lê a raiz
 
-    int rootLocal = header.rootNode; // pega o destino da raiz
-
-    ptr_root = readIndexRegister(bin_index, ptr_root, rootLocal);
-    return ptr_root;
+    root = readIndexRegister(bin_index, root, rootNodeValue);
+    return root;
 }
 // Insere o nó no arquivo na posição em que estiver o arquivo de indice
 // PLACE == -1  para armazenar no final
@@ -737,16 +736,18 @@ void updateBinArchive(FILE *bin_index, BTreeNode *node, int placeRRN)
 // Atualiza o header do arquivo  indice com as informações abaixo
 void updateHeader(FILE *bin_index, char status, int rootNodeRRN, int *nodeIndexRRN)
 {
-    Header header;
-    header.status = status;
-
-    if (rootNodeRRN != -1)
-        header.rootNode = rootNodeRRN;
-    header.RRNnextNode = *nodeIndexRRN;
     fseek(bin_index, 0, SEEK_SET);
-    fwrite(&header.status, sizeof(char), 1, bin_index);
-    fwrite(&header.rootNode, sizeof(int), 1, bin_index);
-    fwrite(&header.RRNnextNode, sizeof(int), 1, bin_index);
+
+    fwrite(&status, sizeof(char), 1, bin_index);
+    if (rootNodeRRN != -1)
+    {
+        fwrite(&rootNodeRRN, sizeof(int), 1, bin_index);
+    }
+    else
+    {
+        fseek(bin_index, 4, SEEK_CUR);
+    }
+    fwrite(nodeIndexRRN, sizeof(int), 1, bin_index);
 }
 
 /*
@@ -874,7 +875,7 @@ void newRootSplit(FILE *bin_index, BTreeNode *root, char **promoted, int *priPro
     updateBinArchive(bin_index, newRight, newRight->RRNdoNo);
     updateBinArchive(bin_index, newRoot, newRoot->RRNdoNo);
     // BTreeNode *newRoot = rootSplit(bin_index, newRight, aux, highestTree, nodeIndexRRN, referenceRRN);
-    updateHeader(bin_index, '1', newRoot->RRNdoNo, nodeIndexRRN);
+    updateHeader(bin_index, '0', newRoot->RRNdoNo, nodeIndexRRN);
 }
 
 // Caso o nó não tenha mais filhos na direção desejada, insere ali mesmo ou promove através do split
@@ -925,8 +926,6 @@ BTreeNode *insertIndexString(FILE *bin_index, int node_inIndex, char *aux, int *
         updateBinArchive(bin_index, root, 0);
         updateHeader(bin_index, '1', root->RRNdoNo, nodeIndexRRN);
         (*nodeIndexRRN)++;
-
-        // updateHeader(bin_index, '1', root->RRNdoNo, nodeIndexRRN);
     }
     // if (root->alturaNo == -1)
     // {
@@ -979,10 +978,12 @@ BTreeNode *insertIndexString(FILE *bin_index, int node_inIndex, char *aux, int *
                     childNode = readIndexRegister(bin_index, childNode, root->P2);
                     shiftPointers(root, childNode, newRight, whereToInsert(root, promoted[2]));
                     shiftRightImplement(root, bottomPromoted, referenceRRN, whereToInsert(root, bottomPromoted));
+
                     updateBinArchive(bin_index, root, root->RRNdoNo);
                     updateBinArchive(bin_index, childNode, childNode->RRNdoNo);
                     updateBinArchive(bin_index, newRight, newRight->RRNdoNo);
-                    updateHeader(bin_index,'1',root->RRNdoNo,nodeIndexRRN);
+                    updateHeader(bin_index, '1', root->RRNdoNo, nodeIndexRRN);
+                    updateHeader(bin_index, '1', -1, nodeIndexRRN);
                     return NULL;
                 }
                 else // split de novo

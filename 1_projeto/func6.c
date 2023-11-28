@@ -196,7 +196,8 @@ void functionality_6(char *binArchiveName, char *outArchiveName, int N)
                 fclose(bin_index); //  Fecha o binário indice devidamente
                 return;            // arquivo inconsciestente
             }
-            BTreeNode *root = getRoot(bin_index);
+            BTreeNode *root = initNode();
+            root = getRoot(bin_index, root);
             int registerRRN = searchRRN(bin_index, root, valorCampo);
             if (registerRRN == -1)
                 printf("Registro inexistente.\n");
