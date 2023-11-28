@@ -92,6 +92,7 @@ typedef struct BTreeNode
     int PR3;
     int P4;
     char **promoted_aux;
+    int *priPromoted;
 
 } BTreeNode;
 
