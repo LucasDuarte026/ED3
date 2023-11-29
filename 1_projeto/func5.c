@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "structsBTree.h"
 #include "B-Tree.h"
 #include "func3.h"
@@ -159,11 +160,6 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
         {
             // updateHeader(bin_index, '1', -1, &nodeIndexRRN);
 
-            BTreeNode *root = initNode();
-            root = getRoot(bin_index, root);
-            printf("\n");
-            treePrint(bin_index, root->RRNdoNo);
-            printf("\n");
             fclose(bin_index);
             return;
         }
@@ -174,6 +170,10 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
             // printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
             insertIndex(bin_index, &dados, &highestTree, &nodeIndexRRN, referenceRRN);
             BTreeNode *root = initNode();
+            fflush(bin_index);
+            fsync(fileno(bin_index));
+
+            // fseek(bin_index, 0, SEEK_SET); // Reposiciona no início do arquivo antes de ler
             root = getRoot(bin_index, root);
             printf("\n");
             treePrint(bin_index, root->RRNdoNo);

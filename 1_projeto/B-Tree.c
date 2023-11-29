@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include "structsBTree.h"
 #include "B-Tree.h"
@@ -630,19 +631,42 @@ BTreeNode *readIndexRegister(FILE *bin_index, BTreeNode *prt_root, int RRN)
 
 BTreeNode *getRoot(FILE *bin_index, BTreeNode *root)
 {
-
-    fseek(bin_index, 0, SEEK_SET); // Vai pro começo do arquivo
-    char status;
-    fread(&status, sizeof(char), 1, bin_index);
-    int rootNodeValue;
-    int analysis = fread(&rootNodeValue, sizeof(int), 1, bin_index); // lê a raiz
-    printf("agora a é %d\n", analysis);
-    root = readIndexRegister(bin_index, root, rootNodeValue);
+    int a, b, testeFSEEK, counter = 0;
+    root = initNode();
+    do
+    {
+        counter++;
+        testeFSEEK = 0, a = 1, b = 1;
+        int rootNodeValue;
+        char status;
+        rewind(bin_index);                          // Rebobina o arquivo para o início
+        testeFSEEK = fseek(bin_index, 0, SEEK_SET); // Vai para o começo do arquivo
+        a = fread(&status, sizeof(char), 1, bin_index);
+        b = fread(&rootNodeValue, sizeof(int), 1, bin_index); // Lê a raiz
+        if (rootNodeValue == -1)
+            rootNodeValue = 0;
+        if (a == 0 || b == 0)
+        {
+            perror("Error reading from file");
+            fprintf(stderr, "errno: %d, strerror: %s\n", errno, strerror(errno));
+            // Handle the error as needed
+        
+            fclose(bin_index);
+            bin_index = fopen("indice1.bin", "rb+");
+        }
+        printf("fseek é:%d   |  status %d e rootNode é: %d\n", testeFSEEK, a, b);
+        root = readIndexRegister(bin_index, root, rootNodeValue);
+        if (counter > 100)
+        {
+            printf("não saiu e não conseguiu ler\n");
+            break;
+        }
+    } while (a != 1 || b != 1);
     return root;
 }
-// Insere o nó no arquivo na posição em que estiver o arquivo de indice
-// PLACE == -1  para armazenar no final
 
+// Insere o nó no arquivo na pos    ição em que estiver o arquivo de indice
+// PLACE == -1  para armazenar no final
 void updateBinArchive(FILE *bin_index, BTreeNode *node, int placeRRN)
 {
 
@@ -729,7 +753,6 @@ void updateBinArchive(FILE *bin_index, BTreeNode *node, int placeRRN)
     }
     fwrite(&node->PR3, sizeof(int), 1, bin_index);
     fwrite(&node->P4, sizeof(int), 1, bin_index);
-    fflush(bin_index);
 }
 
 // Atualiza o header do arquivo  indice com as informações abaixo
@@ -747,7 +770,6 @@ void updateHeader(FILE *bin_index, char status, int rootNodeRRN, int *nodeIndexR
         fseek(bin_index, 4, SEEK_CUR);
     }
     fwrite(nodeIndexRRN, sizeof(int), 1, bin_index);
-    fflush(bin_index);
 }
 
 /*
@@ -979,10 +1001,10 @@ BTreeNode *insertIndexString(FILE *bin_index, int node_inIndex, char *aux, int *
                     shiftPointers(root, childNode, newRight, whereToInsert(root, promoted[2]));
                     shiftRightImplement(root, bottomPromoted, referenceRRN, whereToInsert(root, bottomPromoted));
 
-                    // updateBinArchive(bin_index, root, root->RRNdoNo);
+                    updateBinArchive(bin_index, root, root->RRNdoNo);
                     // updateBinArchive(bin_index, childNode, childNode->RRNdoNo);
                     // updateBinArchive(bin_index, newRight, newRight->RRNdoNo);
-                    updateHeader(bin_index, '1', root->RRNdoNo, nodeIndexRRN);
+                    // updateHeader(bin_index, '1', root->RRNdoNo, nodeIndexRRN);
                     return NULL;
                 }
                 else // split de novo
