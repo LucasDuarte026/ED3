@@ -2,6 +2,7 @@
 #include "structsBTree.h"
 #include "B-Tree.h"
 #include "func5.h"
+#include "func6.h"
 
 int main()
 {
@@ -29,7 +30,7 @@ int main()
 
     char *binRegName;
     char *binArchiveName;
-
+    int N;
     switch (decision)
     {
     case '1':
@@ -41,7 +42,7 @@ int main()
         scanf("%s", argumento_3);
         binRegName = argumento_2;
         binArchiveName = argumento_3;
-        
+
         functionality_5(binRegName, binArchiveName);
 
         /*
@@ -154,6 +155,14 @@ int main()
         */
         break;
     case '6':
+        scanf("%s", argumento_1);
+        scanf("%s", argumento_2);
+        scanf("%s", argumento_3);
+        binRegName = argumento_1;
+        binArchiveName = argumento_2;
+        N = atoi(argumento_3);
+
+        functionality_6(binRegName, binArchiveName, N);
     case '7':
     case '8':
 

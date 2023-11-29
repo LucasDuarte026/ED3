@@ -55,17 +55,13 @@ typedef struct
 typedef struct
 {
     char status;
-    int seedNode;
+    int rootNode;
     int RRNnextNode;
     char garbage[196];
 } Header;
 
-typedef struct structs
-{
-    int nroChavesNo;
-    int alturaNo;
-    int RRNdoNo;
-} DataTree;
+// Os ponteiros são inicializados apontando para NULL,
+// para melhor controle dentro das funções de inserção, asim como discutido com o monitor
 
 /*  Ordem
  * P1 -> Ponteiro para antes do c1
@@ -81,23 +77,23 @@ typedef struct structs
  */
 typedef struct BTreeNode
 {
-    DataTree data;
+    int nroChavesNo;
+    int alturaNo;
+    int RRNdoNo;
 
-    struct BTreeNode *P1;
-    char *C1;
+    int P1;
+    char C1[55];
     int PR1;
-    struct BTreeNode *P2;
-    char *C2;
+    int P2;
+    char C2[55];
     int PR2;
-    struct BTreeNode *P3;
-    char *C3;
+    int P3;
+    char C3[55];
     int PR3;
-    struct BTreeNode *P4;
-    char ** promoted_aux;
-
+    int P4;
+    char **promoted_aux;
+    int *priPromoted;
 
 } BTreeNode;
-
-
 
 #endif
