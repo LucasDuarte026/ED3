@@ -13,7 +13,8 @@ void insertIndex(FILE *bin_index, Dados *dados, int *highestTree, int *nodeIndex
     actual_root = getRoot(bin_index, actual_root);
     if (actual_root->RRNdoNo == -1)
         actual_root->RRNdoNo = 0;
-    insertIndexString(bin_index, actual_root->RRNdoNo, aux, highestTree, nodeIndexRRN, referenceRRN);
+    if(actual_root = insertIndexString(bin_index, actual_root->RRNdoNo, aux, highestTree, nodeIndexRRN, referenceRRN))
+        printf("retornou\n\n\n\n");
 }
 
 Dados *getRegister(FILE *bin, Dados *dados) // Lê o registro completo e armazena em dados
@@ -156,7 +157,7 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
     // le tudo do registro desejado a seguir
     while (fread(&dados.removido, sizeof(char), 1, bin))
     {
-        if (counter == 7)
+        if (counter == 15)
         {
             // updateHeader(bin_index, '1', -1, &nodeIndexRRN);
 
