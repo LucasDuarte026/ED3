@@ -3,6 +3,7 @@
 #include "B-Tree.h"
 #include "func5.h"
 #include "func6.h"
+char *outArchiveName;
 
 int main()
 {
@@ -29,7 +30,6 @@ int main()
     }
 
     char *binRegName;
-    char *binArchiveName;
     int N;
     switch (decision)
     {
@@ -41,9 +41,9 @@ int main()
         scanf("%s", argumento_2);
         scanf("%s", argumento_3);
         binRegName = argumento_2;
-        binArchiveName = argumento_3;
+        outArchiveName = argumento_3;
 
-        functionality_5(binRegName, binArchiveName);
+        functionality_5(binRegName, outArchiveName);
 
         /*
         // teste para p1
@@ -159,10 +159,10 @@ int main()
         scanf("%s", argumento_2);
         scanf("%s", argumento_3);
         binRegName = argumento_1;
-        binArchiveName = argumento_2;
+        outArchiveName = argumento_2;
         N = atoi(argumento_3);
 
-        functionality_6(binRegName, binArchiveName, N);
+        functionality_6(binRegName, outArchiveName, N);
     case '7':
     case '8':
 

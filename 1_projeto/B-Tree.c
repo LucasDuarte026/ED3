@@ -647,14 +647,13 @@ BTreeNode *getRoot(FILE *bin_index, BTreeNode *root)
             rootNodeValue = 0;
         if (a == 0 || b == 0)
         {
-            perror("Error reading from file");
-            fprintf(stderr, "errno: %d, strerror: %s\n", errno, strerror(errno));
-            // Handle the error as needed
-        
+            // perror("Error reading from file");
+            // fprintf(stderr, "errno: %d, strerror: %s\n", errno, strerror(errno));
+
             fclose(bin_index);
-            bin_index = fopen("indice1.bin", "rb+");
+            bin_index = fopen(outArchiveName, "rb+");
         }
-        printf("fseek é:%d   |  status %d e rootNode é: %d\n", testeFSEEK, a, b);
+        // printf("fseek é:%d   |  status %d e rootNode é: %d\n", testeFSEEK, a, b);
         root = readIndexRegister(bin_index, root, rootNodeValue);
         if (counter > 100)
         {
@@ -753,6 +752,7 @@ void updateBinArchive(FILE *bin_index, BTreeNode *node, int placeRRN)
     }
     fwrite(&node->PR3, sizeof(int), 1, bin_index);
     fwrite(&node->P4, sizeof(int), 1, bin_index);
+    fflush(bin_index);
 }
 
 // Atualiza o header do arquivo  indice com as informações abaixo
@@ -770,6 +770,7 @@ void updateHeader(FILE *bin_index, char status, int rootNodeRRN, int *nodeIndexR
         fseek(bin_index, 4, SEEK_CUR);
     }
     fwrite(nodeIndexRRN, sizeof(int), 1, bin_index);
+    fflush(bin_index);
 }
 
 /*
@@ -1002,9 +1003,9 @@ BTreeNode *insertIndexString(FILE *bin_index, int node_inIndex, char *aux, int *
                     shiftRightImplement(root, bottomPromoted, referenceRRN, whereToInsert(root, bottomPromoted));
 
                     updateBinArchive(bin_index, root, root->RRNdoNo);
-                    // updateBinArchive(bin_index, childNode, childNode->RRNdoNo);
-                    // updateBinArchive(bin_index, newRight, newRight->RRNdoNo);
-                    // updateHeader(bin_index, '1', root->RRNdoNo, nodeIndexRRN);
+                    updateBinArchive(bin_index, childNode, childNode->RRNdoNo);
+                    updateBinArchive(bin_index, newRight, newRight->RRNdoNo);
+                    updateHeader(bin_index, '1', root->RRNdoNo, nodeIndexRRN);
                     return NULL;
                 }
                 else // split de novo
