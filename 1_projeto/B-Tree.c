@@ -17,15 +17,14 @@ void cleanKeyVector(char vector[])
 
 BTreeNode *initNode()
 {
-    // Os ponteiros são inicializados apontando para NULL,
-    // para melhor controle dentro das funções de inserção, asim como discutido com o monitor
+    // Os ponteiros são inicializados apontando para -1,
 
     BTreeNode *newNode = (BTreeNode *)malloc(sizeof(BTreeNode));
     newNode->alturaNo = -1;
     newNode->nroChavesNo = -1;
     newNode->RRNdoNo = -1;
 
-    cleanKeyVector(newNode->C1);
+    cleanKeyVector(newNode->C1); // são iniciados com '$'
     cleanKeyVector(newNode->C2);
     cleanKeyVector(newNode->C3);
 
@@ -109,7 +108,7 @@ void treePrint(FILE *bin_index, int RRN)
         treePrint(bin_index, node->P4);
     }
     printf("\t--> Height: %d\t| %d", height, node->RRNdoNo);
-    for (int i = 0; i < 10 - height; i++)
+    for (int i = 0; i < 3 - height; i++)
     {
         printf("\t");
     }
@@ -633,12 +632,11 @@ BTreeNode *getRoot(FILE *bin_index, BTreeNode *root)
 {
 
     fseek(bin_index, 0, SEEK_SET); // Vai pro começo do arquivo
-    fseek(bin_index, 0, SEEK_SET); // Vai pro começo do arquivo
     char status;
-    int rootNodeValue;
     fread(&status, sizeof(char), 1, bin_index);
-    fread(&rootNodeValue, sizeof(int), 1, bin_index); // lê a raiz
-
+    int rootNodeValue;
+    int analysis = fread(&rootNodeValue, sizeof(int), 1, bin_index); // lê a raiz
+    printf("agora a é %d\n", analysis);
     root = readIndexRegister(bin_index, root, rootNodeValue);
     return root;
 }
@@ -731,6 +729,7 @@ void updateBinArchive(FILE *bin_index, BTreeNode *node, int placeRRN)
     }
     fwrite(&node->PR3, sizeof(int), 1, bin_index);
     fwrite(&node->P4, sizeof(int), 1, bin_index);
+    fflush(bin_index);
 }
 
 // Atualiza o header do arquivo  indice com as informações abaixo
@@ -748,6 +747,7 @@ void updateHeader(FILE *bin_index, char status, int rootNodeRRN, int *nodeIndexR
         fseek(bin_index, 4, SEEK_CUR);
     }
     fwrite(nodeIndexRRN, sizeof(int), 1, bin_index);
+    fflush(bin_index);
 }
 
 /*
@@ -979,11 +979,10 @@ BTreeNode *insertIndexString(FILE *bin_index, int node_inIndex, char *aux, int *
                     shiftPointers(root, childNode, newRight, whereToInsert(root, promoted[2]));
                     shiftRightImplement(root, bottomPromoted, referenceRRN, whereToInsert(root, bottomPromoted));
 
-                    updateBinArchive(bin_index, root, root->RRNdoNo);
-                    updateBinArchive(bin_index, childNode, childNode->RRNdoNo);
-                    updateBinArchive(bin_index, newRight, newRight->RRNdoNo);
+                    // updateBinArchive(bin_index, root, root->RRNdoNo);
+                    // updateBinArchive(bin_index, childNode, childNode->RRNdoNo);
+                    // updateBinArchive(bin_index, newRight, newRight->RRNdoNo);
                     updateHeader(bin_index, '1', root->RRNdoNo, nodeIndexRRN);
-                    updateHeader(bin_index, '1', -1, nodeIndexRRN);
                     return NULL;
                 }
                 else // split de novo

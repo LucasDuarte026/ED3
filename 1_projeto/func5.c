@@ -118,7 +118,7 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
      *   Abre o arquivo binário, lê o cabeçario para posicionar devidamente a cabeça leitora para o primeiro RRN
      */
     FILE *bin = fopen(binArchiveName, "rb");        // Abre o arquivo bin de registro
-    FILE *bin_index = fopen(outArchiveName, "wb+"); // criar o bin para colocar os index
+    FILE *bin_index = fopen(outArchiveName, "rb+"); // criar o bin para colocar os index
 
     if (bin == NULL || bin_index == NULL)
     {
@@ -155,7 +155,7 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
     // le tudo do registro desejado a seguir
     while (fread(&dados.removido, sizeof(char), 1, bin))
     {
-        if (counter == 8)
+        if (counter == 7)
         {
             // updateHeader(bin_index, '1', -1, &nodeIndexRRN);
 
@@ -175,6 +175,9 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
             insertIndex(bin_index, &dados, &highestTree, &nodeIndexRRN, referenceRRN);
             BTreeNode *root = initNode();
             root = getRoot(bin_index, root);
+            printf("\n");
+            treePrint(bin_index, root->RRNdoNo);
+            printf("\n");
             referenceRRN++; //  Contador do registros de leitura do arquivo binário
             encontrado = 1; //  Caso encontre, pelo menos uma vez
             if (highestTree < heightTree(bin_index, root))
