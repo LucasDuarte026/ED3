@@ -20,7 +20,6 @@ int main()
     char argumento_1[MAX_STRING_LENGTH];
     char argumento_2[MAX_STRING_LENGTH];
     char argumento_3[MAX_STRING_LENGTH];
-    char argumento_4[MAX_STRING_LENGTH];
     scanf("%c", &decision); // recebe a decisão
 
     if (decision != '5' && decision != '6' && decision != '7' && decision != '8')

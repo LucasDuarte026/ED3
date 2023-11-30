@@ -9,12 +9,14 @@ void insertIndex(FILE *bin_index, Dados *dados, int *highestTree, int *nodeIndex
     char aux[stringConcatMaxSize];                                                                                          //  Cria um auxiliar para guardar tal string concatenada
     strcpy(aux, dados->nomeTecnologiaOrigem.string);                                                                        // Copia origem na aux
     strcat(aux, dados->nomeTecnologiaDestino.string);
-    printf(" -> %s", aux); // Concatena com destino
+    printf(" -> %s, %d", aux,referenceRRN); // Concatena com destino
+    fflush(stdout);
+
     BTreeNode *actual_root = initNode();
     actual_root = getRoot(bin_index, actual_root);
     if (actual_root->RRNdoNo == -1)
         actual_root->RRNdoNo = 0;
-    if (actual_root = insertIndexString(bin_index, actual_root->RRNdoNo, aux, highestTree, nodeIndexRRN, referenceRRN))
+    if ((actual_root = insertIndexString(bin_index, actual_root->RRNdoNo, aux, highestTree, nodeIndexRRN, referenceRRN))!=NULL)
         printf("retornou\n\n\n\n");
 }
 

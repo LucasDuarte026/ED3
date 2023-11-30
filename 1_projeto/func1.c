@@ -48,7 +48,7 @@ void scan_quote_string(char *str)
         strcpy(str, "");
     }
 }
-
+/* não usado
 static void readline(char *string)
 {
     char c = 0;
@@ -70,7 +70,7 @@ static void readline(char *string)
 
     string[i] = '\0';
 }
-
+*/
 static void binarioNaTela(const char *nomeArquivoBinario)
 { /* Você não precisa entender o código dessa função. */
 
@@ -88,7 +88,7 @@ static void binarioNaTela(const char *nomeArquivoBinario)
     }
     fseek(fs, 0, SEEK_END);
     fl = ftell(fs);
-    //Conforme visto na funcionalidade [2], na linguagem SQL o comando SELECT é
+    // Conforme visto na funcionalidade [2], na linguagem SQL o comando SELECT é
     fseek(fs, 0, SEEK_SET);
     mb = (unsigned char *)malloc(fl);
     fread(mb, 1, fl, fs);
@@ -168,6 +168,7 @@ static void Escrever_Dados(FILE *bin, Dados dados)
 
 short int flag_origin = 1; // Teste para caso tenha de dar free ou não nos campos variaveis
 short int flag_destino = 1;
+/* não mais usada
 static Dados LerRegistroCSV_old(FILE *csv) //  referência antiga, não funciona mais devido a necessidade do tratamento com valors NULOS
 {                                          // le o registro
     Dados dados;
@@ -198,7 +199,7 @@ static Dados LerRegistroCSV_old(FILE *csv) //  referência antiga, não funciona
 
     return dados;
 }
-
+*/
 static char *GetNextToken(char **str, const char *delimitador)
 {
 
@@ -234,7 +235,7 @@ static void ProcessarElemento(Dados *dados, const char *elemento, int elementoAt
         {
             dados->nomeTecnologiaOrigem.tamanho = 0;
             dados->nomeTecnologiaOrigem.string = NULO;
-            !flag_origin;
+            flag_origin = !flag_origin;
         }
         else
         {
@@ -268,7 +269,7 @@ static void ProcessarElemento(Dados *dados, const char *elemento, int elementoAt
         {
             dados->nomeTecnologiaDestino.tamanho = 0;
             dados->nomeTecnologiaDestino.string = NULO;
-            !flag_destino;
+            flag_destino = !flag_destino;
         }
         else
         {
@@ -342,11 +343,11 @@ static char **testa_unico(int *prt_quant_tec, Dados dado, char **tecnologies)
     // Verifica se dado.nomeTecnologiaOrigem.string já existe em tecnologies
     for (int i = 0; i < *prt_quant_tec; i++)
     {
-        if (dado.nomeTecnologiaOrigem.string == "NULO")
+        if (strcmp(dado.nomeTecnologiaOrigem.string, "NULO") == 0)
         {
             achouOrigin = 1;
         }
-        if (dado.nomeTecnologiaDestino.string == "NULO")
+        if (strcmp(dado.nomeTecnologiaDestino.string, "NULO") == 0)
         {
             achouDestino = 1;
         }
@@ -385,7 +386,7 @@ static char **testa_par(int *prt_quant_tec_par, Dados dado, char **pares)
 {
     int stringConcatMaxSize = strlen(dado.nomeTecnologiaDestino.string) + strlen(dado.nomeTecnologiaOrigem.string) + 1; //  Para se concatenar, achas-se o tamanho total da string concatenada
     char aux[stringConcatMaxSize];                                                                                      //  Cria um auxiliar para guardar tal string concatenada
-    if (dado.nomeTecnologiaOrigem.string == NULO || dado.nomeTecnologiaDestino.string == NULO)                          // Testa se algum é nulo, pois não conta
+    if (strcmp(dado.nomeTecnologiaOrigem.string, NULO) == 0 || strcmp(dado.nomeTecnologiaDestino.string, NULO) == 0)    // Testa se algum é nulo, pois não conta
     {
         return pares;
     }
@@ -432,10 +433,10 @@ short int Functionality_1(const char csvArchiveName[], const char binArchiveName
 
     char headerLine[MAX_STRING_LENGTH];         //  Cria o ponteiro que armazenará a primeira linha completa
     fgets(headerLine, sizeof(headerLine), csv); //  Pular a primeira linha do csv
-    while (!feof(csv)) //  Lê o arquivo até seu fim (feof)
+    while (!feof(csv))                          //  Lê o arquivo até seu fim (feof)
     {
-        Dados dados;                 //   Inicializa o dado que será usado para ler e escrever nos arquivos
-        dados = LerRegistroCSV(csv); //  Lê o arquivo linha a linha e armazana em dados
+        Dados dados;                                               //   Inicializa o dado que será usado para ler e escrever nos arquivos
+        dados = LerRegistroCSV(csv);                               //  Lê o arquivo linha a linha e armazana em dados
         Escrever_Dados(bin, dados);                                //  Escreve o dado no arquivo binário
         tecnologies = testa_unico(&quant_tec, dados, tecnologies); //  Função que retorna a quantidade de tecnologia unicas
         pares = testa_par(&duplicade_quant_tec, dados, pares);     //  Função que retorna a quantidade de tecnologia duplicadas em pares
@@ -443,12 +444,12 @@ short int Functionality_1(const char csvArchiveName[], const char binArchiveName
         if (!flag_origin) // Uso da flag para só dar free nos elementos variavéis caso eles não sejam nulos (não foram criados)
         {
             free(dados.nomeTecnologiaOrigem.string); // apaga os elementos variaveis para serem alocados novamente com seu tamanho variável
-            !flag_origin;
+            flag_origin = !flag_origin;
         }
         if (!flag_destino) // Uso da flag para só dar free nos elementos variavéis caso eles não sejam nulos (não foram criados)
         {
             free(dados.nomeTecnologiaDestino.string); // apaga os elementos variaveis para serem alocados novamente com seu tamanho variável
-            !flag_destino;
+            flag_destino = !flag_destino;
         }
         proxRNN++;
     }

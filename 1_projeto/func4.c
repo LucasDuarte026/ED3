@@ -6,7 +6,7 @@ static void pula_RRN(FILE *bin, int RRN)
 {
 
     fseek(bin, 13, SEEK_SET);                 //  Aponta para o primeiro registro
-    Dados dados_provisorio;                   //  Inicializa o dado que será só para correr acima dos outros até o RRN desejado
+    // Dados dados_provisorio;                   //  Inicializa o dado que será só para correr acima dos outros até o RRN desejado
     fseek(bin, TAM_REGISTRO * RRN, SEEK_CUR); //  Aponta para o primeiro registro
 }
 

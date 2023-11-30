@@ -1,7 +1,7 @@
 all:
-	gcc -o ./main ./*.c
+	gcc -Wall -o ./main ./*.c
 debug:
-	gcc  -g3 ./*.c -o main
+	gcc  -Wall -g3 ./*.c -o main
 	
 run:
 	./main
