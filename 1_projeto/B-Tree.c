@@ -108,11 +108,14 @@ void treePrint(FILE *bin_index, int RRN)
     {
         treePrint(bin_index, node->P4);
     }
-    printf("\t--> Height: %d\t| %d", height, node->RRNdoNo);
-    for (int i = 0; i < 3 - height; i++)
+
+    printf("H|RRN|%1d|%2d|", height, node->RRNdoNo);
+    for (int i = 0; i < 6 - height; i++)
     {
         printf("\t");
     }
+    printf("<%d>",height);
+ 
     char *chave1, *chave2, *chave3;
 
     if (node->C1[0] != '$')
@@ -128,7 +131,7 @@ void treePrint(FILE *bin_index, int RRN)
     else
         chave3 = " ";
 
-    printf("||%2d||%15s ->(%2d) ||%2d||%15s ->(%2d) ||%2d||%15s ->(%2d) ||%2d|\n", node->P1, chave1, node->PR1, node->P2, chave2, node->PR2, node->P3, chave3, node->PR3, node->P4);
+    printf("||%2d||%25s ->(%2d) ||%2d||%25s ->(%2d) ||%2d||%25s ->(%2d) ||%2d|\n", node->P1, chave1, node->PR1, node->P2, chave2, node->PR2, node->P3, chave3, node->PR3, node->P4);
 }
 
 static int isAvailable(BTreeNode *node)
@@ -250,29 +253,29 @@ static void shiftRightImplement(BTreeNode *node, char *aux, int referenceRRN, in
     }
 }
 
-static void shiftPointers( BTreeNode *childNode, BTreeNode *newRight, int place)
+static void shiftPointers(BTreeNode *dadoNode, BTreeNode *newRight, int place)
 {
     switch (place)
     {
     case 1:
 
-        childNode->P4 = childNode->P3;
-        childNode->P3 = childNode->P2;
-        childNode->P2 = newRight->RRNdoNo;
+        dadoNode->P4 = dadoNode->P3;
+        dadoNode->P3 = dadoNode->P2;
+        dadoNode->P2 = newRight->RRNdoNo;
         break;
     case 2:
-        childNode->P4 = childNode->P3;
-        childNode->P3 = newRight->RRNdoNo;
+        dadoNode->P4 = dadoNode->P3;
+        dadoNode->P3 = newRight->RRNdoNo;
         break;
     case 3:
-        childNode->P4 = newRight->RRNdoNo;
+        dadoNode->P4 = newRight->RRNdoNo;
         break;
     default:
         break;
     }
 }
-/*
-static void shiftSplitPointers(BTreeNode *leftNode, BTreeNode *BottomRight, BTreeNode *topRight, BTreeNode **pointers, int place)
+
+static void shiftSplitPointers(BTreeNode *leftNode, BTreeNode *BottomRight, BTreeNode *topRight, int *pointers, int place)
 {
 
     switch (place)
@@ -283,38 +286,38 @@ static void shiftSplitPointers(BTreeNode *leftNode, BTreeNode *BottomRight, BTre
         topRight->P2 = pointers[2];
         topRight->P3 = pointers[3];
 
-        leftNode->P2 = BottomRight;
-        leftNode->P3 = NULL;
-        leftNode->P4 = NULL;
+        leftNode->P2 = BottomRight->RRNdoNo;
+        leftNode->P3 = -1;
+        leftNode->P4 = -1;
         break;
     case 2:
-        topRight->P1 = BottomRight;
+        topRight->P1 = BottomRight->RRNdoNo;
         topRight->P2 = pointers[2];
         topRight->P3 = pointers[3];
 
-        leftNode->P3 = NULL;
-        leftNode->P4 = NULL;
+        leftNode->P3 = -1;
+        leftNode->P4 = -1;
         break;
     case 3:
         topRight->P1 = pointers[2];
-        topRight->P2 = BottomRight;
+        topRight->P2 = BottomRight->RRNdoNo;
         topRight->P3 = pointers[3];
 
-        leftNode->P3 = NULL;
-        leftNode->P4 = NULL;
+        leftNode->P3 = -1;
+        leftNode->P4 = -1;
         break;
     case 4:
         topRight->P1 = pointers[2];
         topRight->P2 = pointers[3];
-        topRight->P3 = BottomRight;
-        leftNode->P3 = NULL;
-        leftNode->P4 = NULL;
+        topRight->P3 = BottomRight->RRNdoNo;
+        leftNode->P3 = -1;
+        leftNode->P4 = -1;
         break;
     default:
         break;
     }
 }
-*/
+
 int whereToInsert(BTreeNode *node, char *aux)
 {
     if (strcmp(aux, node->C1) < 0 || node->C1[0] == '$')
@@ -502,8 +505,7 @@ void updateBinArchive(FILE *bin_index, BTreeNode *node, int placeRRN)
     fflush(bin_index);
 }
 
-/*
-BTreeNode **promotePointers(BTreeNode *node, BTreeNode **pointers)
+int *promotePointers(BTreeNode *node, int pointers[])
 {
     pointers[0] = node->P1;
     pointers[1] = node->P2;
@@ -511,7 +513,7 @@ BTreeNode **promotePointers(BTreeNode *node, BTreeNode **pointers)
     pointers[3] = node->P4;
     return pointers;
 }
-*/
+
 static BTreeNode *splitNode(FILE *bin_index, BTreeNode *childNode, BTreeNode *newRight, char *aux, int referenceRRN)
 {
     char **vector = (char **)malloc(4 * sizeof(char *));
@@ -578,79 +580,6 @@ int keysQuant(BTreeNode *node)
         return 0;
     }
 }
-
-/*
-BTreeNode *readIndexRegisterBackup(FILE *bin_index, BTreeNode *prt_root, int RRN)
-{
-    fseek(bin_index, (1 + RRN) * RECORD_SIZE, SEEK_SET);
-    fread(&prt_root->nroChavesNo, sizeof(int), 1, bin_index);
-    fread(&prt_root->alturaNo, sizeof(int), 1, bin_index);
-    fread(&prt_root->RRNdoNo, sizeof(int), 1, bin_index);
-
-    fread(&prt_root->P1, sizeof(int), 1, bin_index);
-
-    char buffer[56];
-
-    fgets(buffer, sizeof(buffer), bin_index);
-    if (buffer[0] != '$')
-    {
-        for (int i = 0; i < sizeof(buffer); i++)
-        {
-            if (buffer[i] == '$')
-            {
-                buffer[i] = '\0';
-                break;
-            }
-        }
-        strcpy(prt_root->C1, buffer);
-    }
-    else
-        cleanKeyVector(prt_root->C1);
-    // char teste;
-    // fread(&teste, sizeof(char), 1, bin_index);
-    fread(&prt_root->PR1, sizeof(int), 1, bin_index);
-    fread(&prt_root->P2, sizeof(int), 1, bin_index);
-
-    fgets(buffer, sizeof(buffer), bin_index);
-    if (buffer[0] != '$')
-    {
-        for (int i = 0; i < sizeof(buffer); i++)
-        {
-            if (buffer[i] == '$')
-            {
-                buffer[i] = '\0';
-                break;
-            }
-        }
-        strcpy(prt_root->C2, buffer);
-    }
-    else
-        cleanKeyVector(prt_root->C2);
-
-    fread(&prt_root->PR2, sizeof(int), 1, bin_index);
-    fread(&prt_root->P3, sizeof(int), 1, bin_index);
-
-    fgets(buffer, sizeof(buffer), bin_index);
-    if (buffer[0] != '$')
-    {
-        for (int i = 0; i < sizeof(buffer); i++)
-        {
-            if (buffer[i] == '$')
-            {
-                buffer[i] = '\0';
-                break;
-            }
-        }
-        strcpy(prt_root->C3, buffer);
-    }
-    else
-        cleanKeyVector(prt_root->C3);
-
-    fread(&prt_root->PR3, sizeof(int), 1, bin_index);
-    fread(&prt_root->P4, sizeof(int), 1, bin_index);
-    return prt_root;
-}
-*/
 
 BTreeNode *readIndexRegister(FILE *bin_index, BTreeNode *prt_root, int RRN)
 {
@@ -770,128 +699,37 @@ void updateHeader(FILE *bin_index, char status, int rootNodeRRN, int *nodeIndexR
     fflush(bin_index);
 }
 
-/*
-void acessorSun()
-{
-
-    // Caso o filho retorne um novo newRight, entra aqui para processar a promoção de dado
-    if (newRight = insertIndexString(bin_index, &(*root)->P1, aux, highestTree, RRN))
-    {
-        promoted = newRight->promoted_aux; // Usa a o auxiliar que vem junto com o nó promovido para pegar os dados promovidos
-
-        if (isAvailable((*root)->C3) == 1) // Se estiver disponível o nó pai, já coloca direto
-        {
-
-            shiftPointers((*root), (*root)->P1, newRight, whereToInsert((*root), promoted[1])); // shifta os ponteiros pro lugar correto
-            shiftRightImplement(*root, promoted[1], whereToInsert(*root, promoted[1]));         // Shift complementar que funciona apenas para promoções, rearranjando os ponteiros do split (P1, P2,P3,P4 e P5(na prática existe))
-            return NULL;                                                                        //  Retorna NULL pois não promove
-        }
-
-        else if (isRoot((*root), (*highestTree))) //  Caso seja raíz e esteja recebendo uma promoção de dados
-        {
-            BTreeNode *newRoot = initNode();        //  Inicializa a nova raiz
-            BTreeNode *newBottomRight = newRight;   //  Inicializa o novo nó direito superior
-            BTreeNode *newTopperRight = initNode(); //  Inicializa o novo nó direito inferior
-
-            char *bottomPromoted = promoted[1];                       //  Auxiliar para pegar o nó promovido do segundo abaixo
-            promoted = promoteVector((*root), promoted, promoted[1]); //  Auxiliar para pegar o nó promovido do segundo abaixo
-            pointers = promotePointers((*root), pointers);            //  Auxiliar para pegar os ponteiros corretos
-
-            // newBottomRight = splitNode((*root)->P1, newBottomRight, aux);                                              // splita o nó debaixo
-            newTopperRight = splitNode(*root, newTopperRight, bottomPromoted);                                         // Splita o nó de cima
-            shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted)); // splita os ponteiros no formato de promoção
-
-            // Nomeia os filhos e atribui o valor da raíz
-            newRoot->P1 = *root;
-            newRoot->P2 = newTopperRight;
-            newRoot->C1 = promoted[1];
-            *root = newRoot; // reestaura a nova raiz
-            return NULL;     // retorna NULL pois não promove nada
-        }
-
-        // Caso seja um nó intermediário e tenha que fazer uma promoção
-        else
-        {
-            BTreeNode *newBottomRight = newRight;   //  Inicializa o nó de baixo direito
-            BTreeNode *newTopperRight = initNode(); //  Inicializa o nó de cima direito
-            newTopperRight->data.RRNdoNo = *RRN;
-            (*RRN)++;
-            char *bottomPromoted = promoted[1];                       //  Pega o valor promovido idealmente para o nó superior
-            promoted = promoteVector((*root), promoted, promoted[1]); // Auxilia na promoção, vetor completo
-            pointers = promotePointers((*root), pointers);            // Auxilia na promoção, ponteiros completos
-
-            // newBottomRight = splitNode((*root)->P1, newBottomRight, aux);                                              //  Splita o o nó direito inferior
-            newTopperRight = splitNode(*root, newTopperRight, bottomPromoted);                                         //  Splita o o nó direito Superior
-            shiftSplitPointers(*root, newBottomRight, newTopperRight, pointers, whereToInsert(*root, bottomPromoted)); //  Shifta os ponteiros para depois do split
-            newTopperRight->promoted_aux = promoted;                                                                   // Atribui o vetor auxiliar para promoção
-            return newTopperRight;                                                                                     //  Repassa o nó auxiliar
-        }
-    }
-    return NULL; // ou retorna nada caso não entre nos casos anteriores
-}
-*/
-/*
-BTreeNode *insert(FILE *bin_index, char *aux, int *highestTree, int *nodeIndexRRN, int referenceRRN)
-{
-
-    // Caso não seja um nó, será nó folha, se for, insere
-    if (isAvailable(node))
-    {
-        shiftRightImplement(node, aux, 1); // Dá um shift correto na inserção, colocando-o no local correto
-        return NULL;                       //  Inserido corretamente sem precisar de promover
-    }
-    // Caso esse nó folha também seja raiz, produz uma nova raíz
-    else if (isRoot(node, (*highestTree)))
-    {
-        BTreeNode *newRoot = initNode();  //  Inicializa um novo nó raiz
-        BTreeNode *newRight = initNode(); //  Inicializa um novo nó direito
-        newRight->data.RRNdoNo = *RRN;
-        (*RRN)++;
-        newRoot->data.RRNdoNo = *RRN;
-        (*RRN)++;
-        promoted = promoteVector(node, promoted, aux); //  Vetor auxiliar para promoção
-
-        newRight = splitNode(*root, newRight, aux); //  Splita o nó da direita
-
-        shiftPointers(newRoot, *root, newRight, whereToInsert(newRoot, promoted[1])); //  Shifta, dessa vez, os ponteiros no local correto
-
-        // Nomeia os filhos e atribui o valor da raíz
-        newRoot->P1 = *root;
-        newRoot->P2 = newRight;
-        newRoot->C1 = promoted[1];
-        *root = newRoot; // reestaura a nova raiz
-        return NULL;
-    }
-    // Caso não seja nem raíz nem um nó folha disponível, promove um novo nó direito com o dado promovido
-    BTreeNode *newRight = initNode();
-    newRight->data.RRNdoNo = *RRN;
-    (*RRN)++;
-    newRight->promoted_aux = promoteVector(node, promoted, aux);
-    newRight = splitNode(node, newRight, aux); //  Splita o o nó direito inferior
-    return newRight;                           // para caso tenha que dar split
-}
-*/
 // Testa e insere o dado dentro do arquivo de index
 
-void newRootSplit(FILE *bin_index, BTreeNode *root, char **promoted, int *priPromoted, char *aux, int referenceRRN, int *nodeIndexRRN)
+void newRootSplit(FILE *bin_index, BTreeNode *root, BTreeNode *promotedNewRight, char **promoted, int *priPromoted, char *aux, int referenceRRN, int *nodeIndexRRN)
 {
-    BTreeNode *newRoot = initNode();  //  Inicializa um novo nó raiz
-    BTreeNode *newRight = initNode(); //  Inicializa um novo nó direito
+    BTreeNode *newRoot = initNode();              //  Inicializa a nova raiz
+    BTreeNode *newBottomRight = promotedNewRight; //  Inicializa o novo nó direito superior
+    BTreeNode *newTopperRight = initNode();       //  Inicializa o novo nó direito inferior
 
-    newRight->RRNdoNo = *nodeIndexRRN;
+    char *bottomPromoted = promoted[2]; //  Auxiliar para pegar o nó promovido do segundo abaixo
+
+    newTopperRight->RRNdoNo = *nodeIndexRRN;
     (*nodeIndexRRN)++;
     newRoot->RRNdoNo = *nodeIndexRRN;
     (*nodeIndexRRN)++;
 
-    newRight = splitNode(bin_index, root, newRight, aux, referenceRRN); //  Splita o nó da direita
-    promoted = newRight->promoted_aux;                                  //  Vetor auxiliar para promoção
-    priPromoted = newRight->priPromoted;                                //  Vetor auxiliar para promoção PRI
-    shiftPointers(newRoot, newRight, whereToInsert(newRoot, promoted[2])); //  Shifta, dessa vez, os ponteiros no local correto
+    int pointers[4];
+    promotePointers(root, pointers);
+    promoted = newBottomRight->promoted_aux;   //  Vetor auxiliar para promoção
+    priPromoted = newBottomRight->priPromoted; //  Vetor auxiliar para promoção PRI
+    // Auxilia na promoção, ponteiros completos
+    newTopperRight = splitNode(bin_index, root, newTopperRight, aux, referenceRRN); //  Splita o nó da direita
+
+    // shiftPointers(newRoot, newRight, whereToInsert(newRoot, promoted[2])); //  Shifta, dessa vez, os ponteiros no local correto
+    shiftSplitPointers(root, newBottomRight, newTopperRight, pointers, whereToInsert(root, promoted[2])); // splita os ponteiros no formato de promoção
+
     // Nomeia os filhos e atribui o valor da raíz
     newRoot->P1 = root->RRNdoNo;
-    newRoot->P2 = newRight->RRNdoNo;
+    newRoot->P2 = newTopperRight->RRNdoNo;
     strcpy(newRoot->C1, promoted[2]);
     newRoot->PR1 = priPromoted[2];
+
     // updateBinArchive(bin_index, root, root->RRNdoNo);
     // updateBinArchive(bin_index, newRight, newRight->RRNdoNo);
     updateBinArchive(bin_index, newRoot, newRoot->RRNdoNo);
@@ -910,14 +748,34 @@ BTreeNode *insertLocal(FILE *bin_index, BTreeNode *root, char **promoted, char *
     }
     else // split case
     {
-        int *priPromoted;
+        int *priPromoted = (int *)malloc(sizeof(int));
         if (isRoot(bin_index, root, highestTree)) // split na raiz
         {
+            BTreeNode *newRoot = initNode();               //  Inicializa um novo nó raiz
+            BTreeNode *newRight = initNode();              //  Inicializa um novo nó direito
+            promoted = promoteVector(root, promoted, aux); //  Vetor auxiliar para promoção
             priPromoted = priVector(root, priPromoted, aux, referenceRRN);
-            newRootSplit(bin_index, root, promoted, priPromoted, aux, referenceRRN, nodeIndexRRN);
+
+            newRight->RRNdoNo = *nodeIndexRRN;
+            (*nodeIndexRRN)++;
+            newRoot->RRNdoNo = *nodeIndexRRN;
+            (*nodeIndexRRN)++;
+
+            newRight = splitNode(bin_index, root, newRight, aux, referenceRRN); //  Splita o nó da direita
+            // shiftPointers(newRoot, newRight, whereToInsert(newRoot, promoted[2])); //  Shifta, dessa vez, os ponteiros no local correto
+
+            // Nomeia os filhos e atribui o valor da raíz
+            newRoot->P1 = root->RRNdoNo;
+            newRoot->P2 = newRight->RRNdoNo;
+            strcpy(newRoot->C1, promoted[2]);
+            newRoot->PR1 = priPromoted[2];
+
+            updateBinArchive(bin_index, newRoot, newRoot->RRNdoNo);
+            updateHeader(bin_index, '0', newRoot->RRNdoNo, nodeIndexRRN);
+            // newRootSplit(bin_index, root, newRight, promoted, priPromoted, aux, referenceRRN, nodeIndexRRN);
             return NULL;
         }
-        else // split na raiz
+        else
         {
             // Caso não seja nem raíz nem um nó folha disponível, promove um novo nó direito com o dado promovido
             BTreeNode *newRight = initNode();
@@ -927,7 +785,7 @@ BTreeNode *insertLocal(FILE *bin_index, BTreeNode *root, char **promoted, char *
             newRight->priPromoted = priVector(root, priPromoted, aux, referenceRRN);
             newRight = splitNode(bin_index, root, newRight, aux, referenceRRN); //  Splita o o nó direito inferior
 
-            return newRight;                                                    // para caso tenha que dar split
+            return newRight; // para caso tenha que dar split
         }
     }
 }
@@ -948,21 +806,8 @@ BTreeNode *insertIndexString(FILE *bin_index, int node_inIndex, char *aux, int *
         updateBinArchive(bin_index, root, 0);
         updateHeader(bin_index, '1', root->RRNdoNo, nodeIndexRRN);
         (*nodeIndexRRN)++;
+        return NULL;
     }
-    // if (root->alturaNo == -1)
-    // {
-    //     root = initNode();
-    //     printf("\n\tTesta se alguma vez isso faz sentido em entrarn\n\n");
-    // } // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
-    // // Não inserir pois é elemento repetido, porém não precisa, dado que não existem elementos repetidos
-    // else if
-    // {(stringHigherThen(aux, root->C1, 0) == 0 ||
-    //          stringHigherThen(aux, root->C2, 0) == 0 ||
-    //          stringHigherThen(aux, root->C3, 0) == 0)
-    // {
-    //     printf("aux: %s não armazenado, eh igual um dos indices\n", aux);
-    // }
 
     // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
@@ -996,7 +841,7 @@ BTreeNode *insertIndexString(FILE *bin_index, int node_inIndex, char *aux, int *
                     promoted = promoteVector(root, promoted, bottomPromoted);
                     if (isRoot(bin_index, root, highestTree)) // split na raiz
                     {
-                        newRootSplit(bin_index, root, promoted, priPromoted, bottomPromoted, referenceRRN, nodeIndexRRN);
+                        newRootSplit(bin_index, root, newRight, promoted, priPromoted, bottomPromoted, referenceRRN, nodeIndexRRN);
                         return NULL;
                     }
                     else // split intermediário
@@ -1016,7 +861,7 @@ BTreeNode *insertIndexString(FILE *bin_index, int node_inIndex, char *aux, int *
     }
 
     // Inserir na 2ª posição
-    else if ((strcmp(root->C1, aux) > 0 && strcmp(root->C2, aux) < 0) || root->C2[0] == '$')
+    else if ((strcmp(aux, root->C1) > 0 && strcmp(aux, root->C2) < 0) || root->C2[0] == '$')
     {
         if (root->P2 != -1)
         {
@@ -1045,7 +890,7 @@ BTreeNode *insertIndexString(FILE *bin_index, int node_inIndex, char *aux, int *
                     promoted = promoteVector(root, promoted, bottomPromoted);
                     if (isRoot(bin_index, root, highestTree)) // split na raiz
                     {
-                        newRootSplit(bin_index, root, promoted, priPromoted, bottomPromoted, referenceRRN, nodeIndexRRN);
+                        newRootSplit(bin_index, root, newRight, promoted, priPromoted, bottomPromoted, referenceRRN, nodeIndexRRN);
                         return NULL;
                     }
                     else // split intermediário
@@ -1094,7 +939,7 @@ BTreeNode *insertIndexString(FILE *bin_index, int node_inIndex, char *aux, int *
                     promoted = promoteVector(root, promoted, bottomPromoted);
                     if (isRoot(bin_index, root, highestTree)) // split na raiz
                     {
-                        newRootSplit(bin_index, root, promoted, priPromoted, bottomPromoted, referenceRRN, nodeIndexRRN);
+                        newRootSplit(bin_index, root, newRight, promoted, priPromoted, bottomPromoted, referenceRRN, nodeIndexRRN);
                         return NULL;
                     }
                     else // split intermediário
@@ -1116,7 +961,7 @@ BTreeNode *insertIndexString(FILE *bin_index, int node_inIndex, char *aux, int *
     // Inserir na ultima posição
     else if (strcmp(aux, root->C3) > 0)
     {
-        
+
         if (root->P4 != -1)
         {
             if ((newRight = insertIndexString(bin_index, root->P4, aux, highestTree, nodeIndexRRN, referenceRRN)) != NULL)
@@ -1144,7 +989,7 @@ BTreeNode *insertIndexString(FILE *bin_index, int node_inIndex, char *aux, int *
                     promoted = promoteVector(root, promoted, bottomPromoted);
                     if (isRoot(bin_index, root, highestTree)) // split na raiz
                     {
-                        newRootSplit(bin_index, root, promoted, priPromoted, bottomPromoted, referenceRRN, nodeIndexRRN);
+                        newRootSplit(bin_index, root, newRight, promoted, priPromoted, bottomPromoted, referenceRRN, nodeIndexRRN);
                         return NULL;
                     }
                     else // split intermediário
