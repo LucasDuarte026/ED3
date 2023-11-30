@@ -649,7 +649,6 @@ BTreeNode *readIndexRegister(FILE *bin_index, BTreeNode *prt_root, int RRN)
 BTreeNode *getRoot(FILE *bin_index, BTreeNode *root)
 {
     int a, b, testeFSEEK, counter = 0;
-    root = initNode();
     do
     {
         counter++;

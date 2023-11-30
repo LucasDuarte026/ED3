@@ -178,7 +178,8 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
             printf("\n");
             treePrint(bin_index, root->RRNdoNo);
             printf("\n");
-// sleep(1);
+            // sleep(1);
+
             referenceRRN++; //  Contador do registros de leitura do arquivo binário
             encontrado = 1; //  Caso encontre, pelo menos uma vez
             if (highestTree < heightTree(bin_index, root))

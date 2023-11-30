@@ -10,5 +10,6 @@ projeto_intro/*.zip
 1_projeto/reference.c
 1_projeto/casos_teste2/
 *png
-
+1_projeto/B-tree antigo.txt
 .vscode/settings.json
+et --hard 25eac10
