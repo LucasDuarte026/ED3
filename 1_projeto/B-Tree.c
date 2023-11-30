@@ -875,7 +875,7 @@ BTreeNode *insertIndexString(FILE *bin_index, int node_inIndex, char *aux, int *
         insertInPlace(root, aux, referenceRRN, 1);
         root->RRNdoNo = *nodeIndexRRN;
         updateBinArchive(bin_index, root, 0);
-        updateHeader(bin_index, '1', root->RRNdoNo, nodeIndexRRN);
+        updateHeader(bin_index, '0', root->RRNdoNo, nodeIndexRRN);
         (*nodeIndexRRN)++;
         return NULL;
     }
@@ -988,7 +988,6 @@ BTreeNode *insertIndexString(FILE *bin_index, int node_inIndex, char *aux, int *
             if ((newRight = insertIndexString(bin_index, root->P3, aux, highestTree, nodeIndexRRN, referenceRRN)) != NULL)
             {
                 // se subiu, promoveu o filho
-                // acessorSun(); // caso tenha um nó abaixo, repassa o código recursivo pra lá
                 promoted = newRight->promoted_aux;
                 priPromoted = newRight->priPromoted;
                 char *bottomPromoted = promoted[2];
