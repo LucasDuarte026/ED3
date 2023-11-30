@@ -83,7 +83,7 @@
                 // insira aqui os parametros de entrada
 
                 "<",
-                "casos_teste2/lucas.in" 
+                "casosTeste/lucas.in" 
 
             ],
 
