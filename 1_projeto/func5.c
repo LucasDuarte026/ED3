@@ -152,7 +152,7 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
     insertFirstRoot(bin_index);
 
     Dados dados;
-
+int teste =1;
     int encontrado = 0;                  // para testar registro inexistente
     int highestTree = 0;                 // Valor da atual altura maxima da arvore
     int nodeIndexRRN = 0;                // Contador para os nós inseridos
@@ -173,12 +173,12 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
             // sleep(1);
             BTreeNode *root = initNode();
             root = getRoot(bin_index, root);
-            // if (teste == 0)
-            // {
-            //     printf("\nc:%d\n", counter);
-            //     treePrint(bin_index, root->RRNdoNo);
-            //     printf("\n");
-            // }
+            if (teste == 0)
+            {
+                printf("\nc:%d\n", counter);
+                treePrint(bin_index, root->RRNdoNo);
+                printf("\n");
+            }
             referenceRRN++; //  Contador do registros de leitura do arquivo binário
             encontrado = 1; //  Caso encontre, pelo menos uma vez
             if (highestTree < heightTree(bin_index, root))
@@ -199,9 +199,9 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
     updateHeader(bin_index, '1', -1, &nodeIndexRRN);
     BTreeNode *root = initNode();
     root = getRoot(bin_index, root);
-    // printf("\n");
-    // treePrint(bin_index, root->RRNdoNo);
-    // printf("\n");
+    printf("\n");
+    treePrint(bin_index, root->RRNdoNo);
+    printf("\n");
     fclose(bin);
     fclose(bin_index);
     binarioNaTela(outArchiveName);

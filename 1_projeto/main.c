@@ -3,6 +3,7 @@
 #include "B-Tree.h"
 #include "func5.h"
 #include "func6.h"
+#include "func7.h"
 char *outArchiveName;
 
 int main()
@@ -163,6 +164,14 @@ int main()
 
         functionality_6(binRegName, outArchiveName, N);
     case '7':
+        scanf("%s", argumento_1);
+        scanf("%s", argumento_2);
+        scanf("%s", argumento_3);
+        binRegName = argumento_1;
+        outArchiveName = argumento_2;
+        N = atoi(argumento_3);
+
+        functionality_7(binRegName, outArchiveName, N);
     case '8':
 
         break;
