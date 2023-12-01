@@ -163,6 +163,7 @@ int main()
         N = atoi(argumento_3);
 
         functionality_6(binRegName, outArchiveName, N);
+        break;
     case '7':
         scanf("%s", argumento_1);
         scanf("%s", argumento_2);
@@ -172,6 +173,7 @@ int main()
         N = atoi(argumento_3);
 
         functionality_7(binRegName, outArchiveName, N);
+        break;
     case '8':
 
         break;
