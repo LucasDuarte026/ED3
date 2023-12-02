@@ -3,7 +3,7 @@
 
 
 
-void functionality_6(char *binArchiveName, char *outArchiveName,int N);
+void functionality_6(char *binArchiveName, char *outArchiveName,int N); //  Função principal
 
 
 #endif

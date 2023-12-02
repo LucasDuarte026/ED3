@@ -8,6 +8,7 @@
 short int flag_origin7 = 1; // Teste para caso tenha de dar free ou não nos campos variaveis
 short int flag_destino7 = 1;
 
+//  Remove o espaço '\0' de uma string, acessora à processElement
 void removeSpace(char *str)
 {
     char c = ' ';
@@ -25,6 +26,7 @@ void removeSpace(char *str)
     str[j] = '\0'; // Adiciona o caractere nulo ao final da string
 }
 
+//Função acessora para ProcessElement já implementada na funcionalidade 1
 char *GetNextToken(char **str, const char *delimitador)
 {
 
@@ -45,6 +47,9 @@ char *GetNextToken(char **str, const char *delimitador)
     return token;
 }
 
+/*  Função acessora apara getTerminalRegister que processa as entradas e
+ *  Reconverte para o dados como a converter o NULO em -1 e recortar os espaços
+ */
 static void ProcessElement(Dados *dados, const char *elemento, int elementoAtual)
 {
     const char value_hex[] = "\x0D\x0A"; // \r\n em hexadecimal que fica no fim da linha
@@ -116,6 +121,7 @@ static void ProcessElement(Dados *dados, const char *elemento, int elementoAtual
     }
 }
 
+// Pega os elementos de cada linha de uma entrada e coloca dentro de um /dados
 static Dados getTerminalRegister()
 {
     char linha[200]; // Tamanho máximo da linha
@@ -158,6 +164,7 @@ static Dados getTerminalRegister()
     return dados;
 }
 
+// Retorna o cabeçalho do arquivo de índice
 Header *getIndexHeader(FILE *bin_index)
 {
     Header *header = (Header *)malloc(sizeof(Header));
@@ -173,6 +180,7 @@ Header *getIndexHeader(FILE *bin_index)
     return header;
 }
 
+// Retorna o cabeçalho do binário
 Cabecalho *getBinaryHeader(FILE *bin)
 {
     fseek(bin, 0, SEEK_SET);
@@ -185,6 +193,7 @@ Cabecalho *getBinaryHeader(FILE *bin)
     return header;
 }
 
+// Escreve um novo registro ao final do arquivo binário
 static void writeRegister_inBinary(FILE *bin, Dados dados)
 {
     /*
@@ -231,6 +240,7 @@ static void writeRegister_inBinary(FILE *bin, Dados dados)
     }
 }
 
+// Atualiza o cabeçalho do binário com as devidas entradas
 static void updateHeader_inBinary(FILE *bin, char status, int nroTecnologia, int nroParesTecnologia, int prox)
 {
     /*
@@ -248,6 +258,8 @@ static void updateHeader_inBinary(FILE *bin, char status, int nroTecnologia, int
     fwrite(&cabecalho.nroTecnologia, sizeof(int), 1, bin);
     fwrite(&cabecalho.nroParesTecnologia, sizeof(int), 1, bin);
 }
+
+// Função acessora para chargeTecnologies() já implementada anteriormente e readaptada para o escopo da func7
 static char **testa_unico(int *prt_quant_tec, Dados dado, char ***tecnologies)
 {
     int _quant = *prt_quant_tec;
@@ -293,6 +305,7 @@ static char **testa_unico(int *prt_quant_tec, Dados dado, char ***tecnologies)
     return *tecnologies;
 }
 
+// Função acessora para chargeTecnologies() já implementada anteriormente e readaptada para o escopo da func7
 static char **testa_par(int *prt_quant_tec_par, Dados dado, char ***pares)
 {
     int stringConcatMaxSize = strlen(dado.nomeTecnologiaDestino.string) + strlen(dado.nomeTecnologiaOrigem.string) + 1;
@@ -320,6 +333,8 @@ static char **testa_par(int *prt_quant_tec_par, Dados dado, char ***pares)
     *prt_quant_tec_par = quant_tec_par;
     return *pares;
 }
+
+// Função que conta as tecnologias para recalcular a a nova inserção no arquivo binário
 void chargeTechnologies(FILE *bin, char ***tecnologies, char ***pares, int *quant_tec, int *duplicade_quant_tec)
 {
     Dados dados;
@@ -355,6 +370,10 @@ void chargeTechnologies(FILE *bin, char ***tecnologies, char ***pares, int *quan
     }
 }
 
+/* Abre dois arquivos como leitura e escrita e atualiza os dois arquivos com a inserção de novos campos
+ * Após a inserção no arquivo binário, atualiza-o e sua referência dentro da áevore B. Inserindo-a devidamente com os possíveis splits
+ * Também trata os nulos
+ */
 void functionality_7(char *binArchiveName, char *outArchiveName, int N)
 {
     FILE *bin = fopen(binArchiveName, "rb+");       // binario de registros

@@ -6,7 +6,8 @@
 #include "func3.h"
 #include "func1.h"
 
-BTreeNode *sonRepass(FILE *bin_index, BTreeNode *node, BTreeNode *sun, int place)
+//  Retorna o filho de um nó em uma dada posição relativa ao nó (p1,p2,p3, p4)
+static BTreeNode *sonRepass(FILE *bin_index, BTreeNode *node, BTreeNode *sun, int place)
 {
     int sunRRN;
 
@@ -32,7 +33,8 @@ BTreeNode *sonRepass(FILE *bin_index, BTreeNode *node, BTreeNode *sun, int place
     return sun;
 }
 
-int getRRN(BTreeNode *node, char *valorCampo)
+//  Evidentemente, retorna o pri relativo a uma chave em um nó
+static int getRRN(BTreeNode *node, char *valorCampo)
 {
     if (node->C1)
     {
@@ -52,12 +54,17 @@ int getRRN(BTreeNode *node, char *valorCampo)
     return -1;
 }
 
-int searchRRN(FILE *bin_index, BTreeNode *node, char *valorCampo)
+//  Busca na árvore
+static int searchRRN(FILE *bin_index, BTreeNode *node, char *valorCampo)
 {
-    int seekRRN = -1;
+    int seekRRN = -1; // Para controle de busca, é negativo para caso não ache
     BTreeNode *sonNode = initNode();
-    switch (whereToInsert(node, valorCampo))
+    switch (whereToInsert(node, valorCampo)) // Compara com as chaves do nó em que posição está
     {
+
+        // testa caso a caso, se tiver filho, repassa a função recursiva pra baixo
+        // caso não tenha filho, o campo buscado tem que estar nese nó
+        // ao encontrar, retorna o RRN relativo a chave (PRi de Ci)
     case 1:
         if (node->P1 != -1)
         {
@@ -65,7 +72,7 @@ int searchRRN(FILE *bin_index, BTreeNode *node, char *valorCampo)
             seekRRN = searchRRN(bin_index, sonNode, valorCampo);
         }
         else
-            seekRRN = getRRN(node, valorCampo);
+            seekRRN = getRRN(node, valorCampo); //  Retorna o Pri da chave em específico
 
         break;
     case 2:
@@ -75,7 +82,7 @@ int searchRRN(FILE *bin_index, BTreeNode *node, char *valorCampo)
             seekRRN = searchRRN(bin_index, sonNode, valorCampo);
         }
         else
-            seekRRN = getRRN(node, valorCampo);
+            seekRRN = getRRN(node, valorCampo); //  Retorna o Pri da chave em específico
 
         break;
     case 3:
@@ -85,7 +92,7 @@ int searchRRN(FILE *bin_index, BTreeNode *node, char *valorCampo)
             seekRRN = searchRRN(bin_index, sonNode, valorCampo);
         }
         else
-            seekRRN = getRRN(node, valorCampo);
+            seekRRN = getRRN(node, valorCampo); //  Retorna o Pri da chave em específico
 
         break;
     case 4:
@@ -95,7 +102,7 @@ int searchRRN(FILE *bin_index, BTreeNode *node, char *valorCampo)
             seekRRN = searchRRN(bin_index, sonNode, valorCampo);
         }
         else
-            seekRRN = getRRN(node, valorCampo);
+            seekRRN = getRRN(node, valorCampo); //  Retorna o Pri da chave em específico
 
         break;
     default:
@@ -105,7 +112,8 @@ int searchRRN(FILE *bin_index, BTreeNode *node, char *valorCampo)
     return seekRRN;
 }
 
-Header chargeHeader(FILE *bin_index)
+// Carregar o cabeçalho
+static Header chargeHeader(FILE *bin_index)
 {
     Header header;
     fseek(bin_index, 0, SEEK_SET);
@@ -116,6 +124,10 @@ Header chargeHeader(FILE *bin_index)
     return header;
 }
 
+/*
+ * Para busca. Há dois modos, modo 1 e 2 , para a busca no modo antigo
+ * ou com a func6  e com auxílio da func4
+ */
 void functionality_6(char *binArchiveName, char *outArchiveName, int N)
 {
 
