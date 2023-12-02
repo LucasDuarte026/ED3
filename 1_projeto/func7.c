@@ -8,6 +8,23 @@
 short int flag_origin7 = 1; // Teste para caso tenha de dar free ou não nos campos variaveis
 short int flag_destino7 = 1;
 
+void removeSpace(char *str)
+{
+    char c = ' ';
+    int i, j;
+    int len = strlen(str);
+
+    for (i = j = 0; i < len; i++)
+    {
+        if (str[i] != c)
+        {
+            str[j++] = str[i];
+        }
+    }
+
+    str[j] = '\0'; // Adiciona o caractere nulo ao final da string
+}
+
 char *GetNextToken(char **str, const char *delimitador)
 {
 
@@ -53,7 +70,7 @@ static void ProcessElement(Dados *dados, const char *elemento, int elementoAtual
         }
         break;
     case 2:
-        if (strcmp(elemento, " NULO") == 0)
+        if (strcmp(elemento, "NULO") == 0)
         {
             dados->grupo = -1; // e será printado NULO
         }
@@ -63,7 +80,7 @@ static void ProcessElement(Dados *dados, const char *elemento, int elementoAtual
         }
         break;
     case 3:
-        if (strcmp(elemento, " NULO") == 0)
+        if (strcmp(elemento, "NULO") == 0)
         {
             dados->popularidade = -1; // e será printado NULO
         }
@@ -87,7 +104,7 @@ static void ProcessElement(Dados *dados, const char *elemento, int elementoAtual
         }
         break;
     case 5:
-        if (strcmp(elemento, " NULO") == 0 || strcmp(elemento, value_hex) == 0) // vê se é o fim da linha o 5 elemento, esté é nulo!. este teste eé feito pois no csv tem ,, no final e o 5º elemento nem aparece
+        if (strcmp(elemento, "NULO") == 0 || strcmp(elemento, value_hex) == 0) // vê se é o fim da linha o 5 elemento, esté é nulo!. este teste eé feito pois no csv tem ,, no final e o 5º elemento nem aparece
         {
             dados->peso = -1; // e será printado NULO
         }
@@ -129,7 +146,7 @@ static Dados getTerminalRegister()
             {
                 break; //   Sai quando chega no fim da linha
             }
-
+            removeSpace(elemento);
             ProcessElement(&dados, elemento, elementoAtual); // Processa o elemento
             // printf("iterativa: linha: %s\te o elemento: %s\n", linha, elemento); // visualizar em tempo real o que está acontecendo
 
@@ -215,94 +232,84 @@ static void updateHeader_inBinary(FILE *bin, char status, int nroTecnologia, int
     fwrite(&cabecalho.nroTecnologia, sizeof(int), 1, bin);
     fwrite(&cabecalho.nroParesTecnologia, sizeof(int), 1, bin);
 }
-
-static char **testa_unico(int *prt_quant_tec, Dados dado, char **tecnologies)
+static char **testa_unico(int *prt_quant_tec, Dados dado, char ***tecnologies)
 {
-    int _quant = *prt_quant_tec; //  Passar o ponteiro para uma variável local
-    int achouOrigin = 0;         //  Contar caso ache uma origem
-    int achouDestino = 0;        // Contar caso ache um destino
-    // printf("\n");
-    // for (int i = 0; i < *prt_quant_tec; i++)
-    // {
-    //     printf("Elemento %d: %s\n", i + 1, tecnologies[i]);
-    // }
-    // Verifica se dado.nomeTecnologiaOrigem.string já existe em tecnologies
+    int _quant = *prt_quant_tec;
+    int achouOrigin = 0;
+    int achouDestino = 0;
+
     for (int i = 0; i < *prt_quant_tec; i++)
     {
         if (dado.nomeTecnologiaOrigem.tamanho == 0)
         {
             achouOrigin = 1;
         }
-        if (strcmp(dado.nomeTecnologiaOrigem.string, tecnologies[i]) == 0) // testa se a tecnologia existe
+        if (strcmp(dado.nomeTecnologiaOrigem.string, (*tecnologies)[i]) == 0)
         {
-            // Tecnologia já existe
             achouOrigin = 1;
         }
         if (dado.nomeTecnologiaDestino.tamanho == 0)
         {
             achouDestino = 1;
         }
-        if (strcmp(dado.nomeTecnologiaDestino.string, tecnologies[i]) == 0) // testa se a tecnologia existe
+        if (strcmp(dado.nomeTecnologiaDestino.string, (*tecnologies)[i]) == 0)
         {
-            // Tecnologia já existe
             achouDestino = 1;
-            if (achouDestino && achouOrigin) // economizar poder computacional
+            if (achouDestino && achouOrigin)
                 break;
         }
     }
 
     if (!achouOrigin)
     {
-        _quant++;                                                           //  se não encontrou, soma na quantidade
-        tecnologies = realloc(tecnologies, _quant * sizeof(char *));        //  E adiciona 1 espaço do tamanho de ponteiro de char (string) para tecnologias
-        tecnologies[_quant - 1] = strdup(dado.nomeTecnologiaOrigem.string); //  E armazena tal string na posição correta
+        _quant++;
+        *tecnologies = realloc(*tecnologies, _quant * sizeof(char *));
+        (*tecnologies)[_quant - 1] = strdup(dado.nomeTecnologiaOrigem.string);
     }
     if (!achouDestino)
     {
-
-        _quant++;                                                            //  se não encontrou, soma na quantidade
-        tecnologies = realloc(tecnologies, _quant * sizeof(char *));         //  E adiciona 1 espaço do tamanho de ponteiro de char (string) para tecnologias
-        tecnologies[_quant - 1] = strdup(dado.nomeTecnologiaDestino.string); //  E armazena tal string na posição correta
+        _quant++;
+        *tecnologies = realloc(*tecnologies, _quant * sizeof(char *));
+        (*tecnologies)[_quant - 1] = strdup(dado.nomeTecnologiaDestino.string);
     }
-    *prt_quant_tec = _quant; //  devolver ao ponteiro para o valor da variável local
+    *prt_quant_tec = _quant;
 
-    return tecnologies; // E devolve tecnologies devidamente modificado
+    return *tecnologies;
 }
-static char **testa_par(int *prt_quant_tec_par, Dados dado, char **pares)
+
+static char **testa_par(int *prt_quant_tec_par, Dados dado, char ***pares)
 {
-    int stringConcatMaxSize = strlen(dado.nomeTecnologiaDestino.string) + strlen(dado.nomeTecnologiaOrigem.string) + 1; //  Para se concatenar, achas-se o tamanho total da string concatenada
-    char aux[stringConcatMaxSize];                                                                                      //  Cria um auxiliar para guardar tal string concatenada
-    if (strcmp(dado.nomeTecnologiaOrigem.string, "") == 0 || strcmp(dado.nomeTecnologiaDestino.string, "") == 0)        // Testa se algum é nulo, pois não conta
+    int stringConcatMaxSize = strlen(dado.nomeTecnologiaDestino.string) + strlen(dado.nomeTecnologiaOrigem.string) + 1;
+    char aux[stringConcatMaxSize];
+    if (strcmp(dado.nomeTecnologiaOrigem.string, "") == 0 || strcmp(dado.nomeTecnologiaDestino.string, "") == 0)
     {
-        return pares;
+        return *pares;
     }
-    strcpy(aux, dado.nomeTecnologiaOrigem.string);  // Copia origem na aux
-    strcat(aux, dado.nomeTecnologiaDestino.string); // Concatena com destino
-    int quant_tec_par = *prt_quant_tec_par;         //  Pega o ponteiro do contador analogamente ao singular
+    strcpy(aux, dado.nomeTecnologiaOrigem.string);
+    strcat(aux, dado.nomeTecnologiaDestino.string);
+    int quant_tec_par = *prt_quant_tec_par;
     for (int i = 0; i < quant_tec_par; i++)
     {
-        if (strcmp(pares[i], aux) == 0) // Testa se existe
+        if (strcmp((*pares)[i], aux) == 0)
         {
-            return pares; // Sai se existir
+            return *pares;
         }
     }
 
-    quant_tec_par++;                                        // soma um na quantidade
-    pares = realloc(pares, quant_tec_par * sizeof(char *)); // realoca dinamicamente
-    pares[quant_tec_par - 1] = malloc(strlen(aux) + 1);     // Aloca memória para a nova string
-    strcpy(pares[quant_tec_par - 1], aux);                  // Copia o conteúdo de aux para a nova memória alocada
+    quant_tec_par++;
+    *pares = realloc(*pares, quant_tec_par * sizeof(char *));
+    (*pares)[quant_tec_par - 1] = malloc(strlen(aux) + 1);
+    strcpy((*pares)[quant_tec_par - 1], aux);
 
-    *prt_quant_tec_par = quant_tec_par; // Passa pro ponteiro
-    return pares;                       //  Retorna pares devidamente modificado
+    *prt_quant_tec_par = quant_tec_par;
+    return *pares;
 }
-
-void chargeTechnologies(FILE *bin, char **tecnologies, char **pares, int *quant_tec, int *duplicade_quant_tec)
+void chargeTechnologies(FILE *bin, char ***tecnologies, char ***pares, int *quant_tec, int *duplicade_quant_tec)
 {
     Dados dados;
     fseek(bin, TAM_CABECALHO, SEEK_SET);
     while (fread(&dados.removido, sizeof(char), 1, bin))
     {
-
         if (dados.removido == '0')
         {
             fread(&dados.grupo, sizeof(int), 1, bin);
@@ -319,17 +326,15 @@ void chargeTechnologies(FILE *bin, char **tecnologies, char **pares, int *quant_
             fread(dados.nomeTecnologiaDestino.string, sizeof(char), dados.nomeTecnologiaDestino.tamanho, bin);
             dados.nomeTecnologiaDestino.string[dados.nomeTecnologiaDestino.tamanho] = '\0';
 
-            // printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
+            *tecnologies = testa_unico(quant_tec, dados, tecnologies);
+            *pares = testa_par(duplicade_quant_tec, dados, pares);
 
-            tecnologies = testa_unico(quant_tec, dados, tecnologies); //  Função que retorna a quantidade de tecnologia unicas
-            pares = testa_par(duplicade_quant_tec, dados, pares);     //  Função que retorna a quantidade de tecnologia duplicadas em pares
-
-            free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
+            free(dados.nomeTecnologiaOrigem.string);
             free(dados.nomeTecnologiaDestino.string);
         }
         else if (dados.removido == '1')
         {
-            fseek(bin, TAM_REGISTRO - 1, SEEK_CUR); //  Pula para o próximo registro (-1 pois já le o '1')
+            fseek(bin, TAM_REGISTRO - 1, SEEK_CUR);
         }
     }
 }
@@ -351,9 +356,13 @@ void functionality_7(char *binArchiveName, char *outArchiveName, int N)
     char auxiliar_lixo[5];
     fgets(auxiliar_lixo, sizeof(auxiliar_lixo), stdin); // remover a primeira linha de lixo restante do fim da leitura anterior
 
+    int teste = 0;
     for (int i = 0; i < N; i++)
     {
-        int proxRNN = 0;             //  armazena onde está o prox RNN
+        if (teste)
+        {
+            break;
+        }
         int quant_tec = 0;           //  Contador para quantidade de tecnologias
         int duplicade_quant_tec = 0; //  Contador para quantidade de tecnologias duplicadas
         char **tecnologies = NULL;   //  Inicializa um vetor que armazena ponteiros strings dos singulares
@@ -364,19 +373,18 @@ void functionality_7(char *binArchiveName, char *outArchiveName, int N)
 
         headerIndex = getIndexHeader(bin_index);
         headerBinary = getBinaryHeader(bin);
-        chargeTechnologies(bin, tecnologies, pares, &quant_tec, &duplicade_quant_tec);
+        // chargeTechnologies(bin, &tecnologies, &pares, &quant_tec, &duplicade_quant_tec);
 
         writeRegister_inBinary(bin, dados); //  Escreve o dado no arquivo binário
-
-        updateHeader_inBinary(bin, '0', quant_tec, duplicade_quant_tec, proxRNN); //  Atualiza o cabeçalho com as informações finais do binário
+        chargeTechnologies(bin, &tecnologies, &pares, &quant_tec, &duplicade_quant_tec);
 
         BTreeNode *root = initNode();
         root = getRoot(bin_index, root);
         if (highestTree < heightTree(bin_index, root))
             highestTree = heightTree(bin_index, root);
-        headerIndex->RRNnextNode++;
-        headerBinary->proxRRN++;
         insertIndex(bin_index, &dados, &highestTree, &headerIndex->RRNnextNode, headerBinary->proxRRN);
+        // headerIndex->RRNnextNode++;
+        headerBinary->proxRRN++;
 
         if (!flag_origin7) // Uso da flag para só dar free nos elementos variavéis caso eles não sejam nulos (não foram criados)
         {
@@ -388,8 +396,12 @@ void functionality_7(char *binArchiveName, char *outArchiveName, int N)
             free(dados.nomeTecnologiaDestino.string); // apaga os elementos variaveis para serem alocados novamente com seu tamanho variável
             flag_destino7 = !flag_destino7;
         }
-        updateHeader_inBinary(bin, '0', quant_tec, duplicade_quant_tec, proxRNN); //  Atualiza o cabeçalho com as informações finais do binário
+        updateHeader_inBinary(bin, '0', quant_tec, duplicade_quant_tec, headerBinary->proxRRN); //  Atualiza o cabeçalho com as informações finais do binário
         updateHeader(bin_index, '0', -1, &headerIndex->RRNnextNode);
+
+        // printf("\n");
+        // treePrint(bin_index, root->RRNdoNo);
+        // printf("\n");
     }
     char one = '1';
     fseek(bin, 0, SEEK_SET);

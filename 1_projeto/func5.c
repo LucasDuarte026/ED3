@@ -2,7 +2,6 @@
 #include "B-Tree.h"
 #include "func3.h"
 #include "func1.h"
-#include <unistd.h>
 
 void insertIndex(FILE *bin_index, Dados *dados, int *highestTree, int *nodeIndexRRN, int referenceRRN) // Testa e insere o dado dentro do arquivo de index
 {
@@ -152,7 +151,6 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
     insertFirstRoot(bin_index);
 
     Dados dados;
-int teste =1;
     int encontrado = 0;                  // para testar registro inexistente
     int highestTree = 0;                 // Valor da atual altura maxima da arvore
     int nodeIndexRRN = 0;                // Contador para os nós inseridos
@@ -170,10 +168,9 @@ int teste =1;
             dados = *getRegister(bin, &dados);
             // printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
             insertIndex(bin_index, &dados, &highestTree, &nodeIndexRRN, referenceRRN);
-            // sleep(1);
             BTreeNode *root = initNode();
             root = getRoot(bin_index, root);
-            if (teste == 0)
+            if (1)
             {
                 printf("\nc:%d\n", counter);
                 treePrint(bin_index, root->RRNdoNo);

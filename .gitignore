@@ -4,7 +4,8 @@ projeto_intro/dados*.bin
 projeto_intro/main
 projeto_intro/*.zip
 
-1_projeto/*.zip
+1_projeto/zips
+1_projeto/testados
 1_projeto/output.*
 1_projeto/func5 antiga.txt
 1_projeto/reference.c

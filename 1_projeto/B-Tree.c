@@ -170,7 +170,6 @@ static void insertInPlace(BTreeNode *node, char *aux, int referenceRRN, int plac
  * -> depois 2
  * -> iguais 0
  */
-
 /* Função implementada por mim, mas não mais usada. strcmp();
 static int stringHigherThen(char *a, char *b, int place)
 {
@@ -722,14 +721,20 @@ BTreeNode *intermediateSplit(FILE *bin_index, BTreeNode *root, BTreeNode *promot
 
     promoted = newBottomRight->promoted_aux;   //  Vetor auxiliar para promoção
     priPromoted = newBottomRight->priPromoted; //  Vetor auxiliar para promoção PRI
-
+    char *bottonPromoted = promoted[2];
+    int priBottonPromoted = priPromoted[2];
+    promoted = promoteVector(root, promoted, bottonPromoted);
+    priPromoted = priVector(root, priPromoted, bottonPromoted, priBottonPromoted);
     // Auxilia na promoção, ponteiros completos
-    int where = whereToInsert(root, promoted[2]);
-    newTopperRight = splitNode(bin_index, root, newTopperRight, aux, referenceRRN); //  Splita o nó da direita
+    int where = whereToInsert(root, bottonPromoted);
+    newTopperRight = splitNode(bin_index, root, newTopperRight, bottonPromoted, priBottonPromoted); //  Splita o nó da direita
 
     shiftSplitPointers(root, newBottomRight, newTopperRight, pointers, where); // splita os ponteiros no formato de promoção
     updateBinArchive(bin_index, root, root->RRNdoNo);
     updateBinArchive(bin_index, newTopperRight, newTopperRight->RRNdoNo);
+
+    newTopperRight->promoted_aux = promoted;
+    newTopperRight->priPromoted = priPromoted;
     return newTopperRight;
 }
 
