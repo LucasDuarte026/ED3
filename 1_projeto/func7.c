@@ -197,12 +197,28 @@ static void writeRegister_inBinary(FILE *bin, Dados dados)
     fwrite(&dados.popularidade, sizeof(int), 1, bin);
     fwrite(&dados.peso, sizeof(int), 1, bin);
 
-    fwrite(&dados.nomeTecnologiaOrigem.tamanho, sizeof(int), 1, bin);
-    fwrite(dados.nomeTecnologiaOrigem.string, sizeof(char), dados.nomeTecnologiaOrigem.tamanho, bin);
-
-    fwrite(&dados.nomeTecnologiaDestino.tamanho, sizeof(int), 1, bin);
-    fwrite(dados.nomeTecnologiaDestino.string, sizeof(char), dados.nomeTecnologiaDestino.tamanho, bin);
-
+    if (strcmp(dados.nomeTecnologiaOrigem.string, "NULO") != 0)
+    {
+        fwrite(&dados.nomeTecnologiaOrigem.tamanho, sizeof(int), 1, bin);
+        fwrite(dados.nomeTecnologiaOrigem.string, sizeof(char), dados.nomeTecnologiaOrigem.tamanho, bin);
+    }
+    else
+    {
+        char auxTrash = '$';
+        dados.nomeTecnologiaOrigem.tamanho = 0;
+        fwrite(&dados.nomeTecnologiaOrigem.tamanho, sizeof(int), 1, bin);
+    }
+    if (strcmp(dados.nomeTecnologiaDestino.string, "NULO") != 0)
+    {
+        fwrite(&dados.nomeTecnologiaDestino.tamanho, sizeof(int), 1, bin);
+        fwrite(dados.nomeTecnologiaDestino.string, sizeof(char), dados.nomeTecnologiaDestino.tamanho, bin);
+    }
+    else
+    {
+        char auxTrash = '$';
+        dados.nomeTecnologiaDestino.tamanho = 0;
+        fwrite(&dados.nomeTecnologiaDestino.tamanho, sizeof(int), 1, bin);
+    }
     int actualSize = sizeof(char) + 3 * sizeof(int) + 2 * sizeof(int) + dados.nomeTecnologiaOrigem.tamanho + dados.nomeTecnologiaDestino.tamanho;
 
     // Calcule a quantidade de lixo
@@ -373,19 +389,30 @@ void functionality_7(char *binArchiveName, char *outArchiveName, int N)
 
         headerIndex = getIndexHeader(bin_index);
         headerBinary = getBinaryHeader(bin);
-        // chargeTechnologies(bin, &tecnologies, &pares, &quant_tec, &duplicade_quant_tec);
+        chargeTechnologies(bin, &tecnologies, &pares, &quant_tec, &duplicade_quant_tec);
 
         writeRegister_inBinary(bin, dados); //  Escreve o dado no arquivo binário
         chargeTechnologies(bin, &tecnologies, &pares, &quant_tec, &duplicade_quant_tec);
+        if (strcmp(dados.nomeTecnologiaOrigem.string, "NULO") == 0 || strcmp(dados.nomeTecnologiaDestino.string, "NULO") == 0)
+        {
+            // printf("um dos dados é nulo\n");
+            // Não faz nada, idealmente aqui só tem que pular pois não insere na árvore de indice
+        }
+        else
+        {
+            BTreeNode *root = initNode();
+            root = getRoot(bin_index, root);
+            if (highestTree < heightTree(bin_index, root))
+                highestTree = heightTree(bin_index, root);
+            insertIndex(bin_index, &dados, &highestTree, &headerIndex->RRNnextNode, headerBinary->proxRRN);
+            // headerIndex->RRNnextNode++;
+            updateHeader(bin_index, '0', -1, &headerIndex->RRNnextNode);
 
-        BTreeNode *root = initNode();
-        root = getRoot(bin_index, root);
-        if (highestTree < heightTree(bin_index, root))
-            highestTree = heightTree(bin_index, root);
-        insertIndex(bin_index, &dados, &highestTree, &headerIndex->RRNnextNode, headerBinary->proxRRN);
-        // headerIndex->RRNnextNode++;
+            // printf("\n");
+            // treePrint(bin_index, root->RRNdoNo);
+            // printf("\n");
+        }
         headerBinary->proxRRN++;
-
         if (!flag_origin7) // Uso da flag para só dar free nos elementos variavéis caso eles não sejam nulos (não foram criados)
         {
             free(dados.nomeTecnologiaOrigem.string); // apaga os elementos variaveis para serem alocados novamente com seu tamanho variável
@@ -397,11 +424,6 @@ void functionality_7(char *binArchiveName, char *outArchiveName, int N)
             flag_destino7 = !flag_destino7;
         }
         updateHeader_inBinary(bin, '0', quant_tec, duplicade_quant_tec, headerBinary->proxRRN); //  Atualiza o cabeçalho com as informações finais do binário
-        updateHeader(bin_index, '0', -1, &headerIndex->RRNnextNode);
-
-        // printf("\n");
-        // treePrint(bin_index, root->RRNdoNo);
-        // printf("\n");
     }
     char one = '1';
     fseek(bin, 0, SEEK_SET);

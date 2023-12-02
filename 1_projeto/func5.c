@@ -170,7 +170,7 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
             insertIndex(bin_index, &dados, &highestTree, &nodeIndexRRN, referenceRRN);
             BTreeNode *root = initNode();
             root = getRoot(bin_index, root);
-            if (1)
+            if (0)
             {
                 printf("\nc:%d\n", counter);
                 treePrint(bin_index, root->RRNdoNo);
@@ -196,9 +196,9 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
     updateHeader(bin_index, '1', -1, &nodeIndexRRN);
     BTreeNode *root = initNode();
     root = getRoot(bin_index, root);
-    printf("\n");
-    treePrint(bin_index, root->RRNdoNo);
-    printf("\n");
+    // printf("\n");
+    // treePrint(bin_index, root->RRNdoNo);
+    // printf("\n");
     fclose(bin);
     fclose(bin_index);
     binarioNaTela(outArchiveName);
