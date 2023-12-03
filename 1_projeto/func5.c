@@ -10,7 +10,7 @@ void insertIndex(FILE *bin_index, Dados *dados, int *highestTree, int *nodeIndex
     char aux[stringConcatMaxSize];                                                                                          //  Cria um auxiliar para guardar tal string concatenada
     strcpy(aux, dados->nomeTecnologiaOrigem.string);                                                                        // Copia origem na aux
     strcat(aux, dados->nomeTecnologiaDestino.string);
-    printf(" -> %s, %d\n", aux, referenceRRN); // Concatena com destino
+    // printf(" -> %s, %d\n", aux, referenceRRN); // Concatena com destino
     fflush(stdout);
 
     BTreeNode *actual_root = initNode();
@@ -142,27 +142,39 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
         {
             counter++;
             dados = *getRegister(bin, &dados);
-            // printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
-            insertIndex(bin_index, &dados, &highestTree, &nodeIndexRRN, referenceRRN);
-            BTreeNode *root = initNode();
-            root = getRoot(bin_index, root);
-            if (counter % 1000 == 0)
-            {
-                printf("\nc:%d", counter);
-                treePrint(bin_index, root->RRNdoNo);
-                printf("\n");
-            }
+            // printf(" -> %s%s, %d\n", dados.nomeTecnologiaOrigem.string, dados.nomeTecnologiaDestino.string, referenceRRN); // Concatena com destino
 
-            // Usado para printar no terminal toda a arvore. Foi anteriomente usada para debug
-            referenceRRN++; //  Contador do registros de leitura do arquivo binário
-            encontrado = 1; //  Caso encontre, pelo menos uma vez
-            if (highestTree < heightTree(bin_index, root))
-                highestTree = heightTree(bin_index, root);
+            if (dados.nomeTecnologiaOrigem.tamanho != 0 && dados.nomeTecnologiaDestino.tamanho != 0)
+            { // printa_registro(&dados); //  Utiliza a função já previamente criada na funcionalidade 3 para printar n tela o devido registro
+                insertIndex(bin_index, &dados, &highestTree, &nodeIndexRRN, referenceRRN);
+                BTreeNode *root = initNode();
+                root = getRoot(bin_index, root);
+                // if (counter % 1000 == 0)
+                // {
+                //     printf("\nc:%d", counter);
+                //     treePrint(bin_index, root->RRNdoNo);
+                //     printf("\n");
+                // }
+
+                // Usado para printar no terminal toda a arvore. Foi anteriomente usada para debug
+                referenceRRN++; //  Contador do registros de leitura do arquivo binário
+                encontrado = 1; //  Caso encontre, pelo menos uma vez
+                if (highestTree < heightTree(bin_index, root))
+                    highestTree = heightTree(bin_index, root);
+            }
+            else
+            {
+                referenceRRN++; //  Contador do registros de leitura do arquivo binário
+                // função acessora para debig
+                // printf("dados:\t|%d||%s||%d||%s||", dados.nomeTecnologiaOrigem.tamanho, dados.nomeTecnologiaOrigem.string, dados.nomeTecnologiaDestino.tamanho, dados.nomeTecnologiaDestino.string);
+            }
             free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
             free(dados.nomeTecnologiaDestino.string);
         }
         else if (dados.removido == '1')
         {
+            referenceRRN++; //  Contador do registros de leitura do arquivo binário
+
             fseek(bin, TAM_REGISTRO - 1, SEEK_CUR); // Pula o registro removido            }
         }
     }
@@ -174,9 +186,11 @@ void functionality_5(char *binArchiveName, char *outArchiveName)
     updateHeader(bin_index, '1', -1, &nodeIndexRRN);
     BTreeNode *root = initNode();
     root = getRoot(bin_index, root);
-    printf("\n");
-    treePrint(bin_index, root->RRNdoNo);
-    printf("\n");
+
+    // para degub para ver a arvore criada 
+    // printf("\n");
+    // treePrint(bin_index, root->RRNdoNo);
+    // printf("\n");
     fclose(bin);
     fclose(bin_index);
     binarioNaTela(outArchiveName);
