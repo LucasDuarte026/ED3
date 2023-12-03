@@ -23,7 +23,7 @@ int main()
     char argumento_3[MAX_STRING_LENGTH];
     scanf("%c", &decision); // recebe a decisão
 
-    if (decision != '5' && decision != '6' && decision != '7' && decision != '8')
+    if (decision != '5' && decision != '6' && decision != '7')
     {
         printf("-> Erro de decisão\n"); // caso a escolha n seja válida
         return 1;
