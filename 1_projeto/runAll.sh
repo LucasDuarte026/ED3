@@ -37,7 +37,7 @@ cp ./arquivos_v10/antes/indice9.bin indice9.bin
 cp ./arquivos_v10/antes/indice10.bin indice10.bin
 echo "all cleaned up"
 make 
-for i in {2..2}
+for i in {1..9}
 do
   echo "Iteração $i"
   ./main < casosTeste/$i.in > output_teste

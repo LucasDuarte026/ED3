@@ -6,8 +6,7 @@
 #include "structsBTree.h"
 #include "B-Tree.h"
 
-/*  Inicializa a raiz   */
-
+// Limpa uma string e preenche com lixo '$'
 void cleanKeyVector(char vector[])
 {
     for (int i = 0; i < 55; i++)
@@ -16,6 +15,7 @@ void cleanKeyVector(char vector[])
     }
 }
 
+//  Inicializa dinamicamente um nó 
 BTreeNode *initNode()
 {
     // Os ponteiros são inicializados apontando para -1,
@@ -41,6 +41,7 @@ BTreeNode *initNode()
     return newNode;
 }
 
+//  Retorna a altura do
 int heightTree(FILE *bin_index, BTreeNode *node)
 {
     int height = 0;
@@ -86,6 +87,7 @@ int heightTree(FILE *bin_index, BTreeNode *node)
     return height + 1;
 }
 
+//  Printa a árvore completa Função majoritariamente utilizada para debug
 void treePrint(FILE *bin_index, int RRN)
 {
     BTreeNode *node = initNode();
@@ -134,6 +136,7 @@ void treePrint(FILE *bin_index, int RRN)
     printf("||%2d||%25s ->(%2d) ||%2d||%25s ->(%2d) ||%2d||%25s ->(%2d) ||%2d||\n", node->P1, chave1, node->PR1, node->P2, chave2, node->PR2, node->P3, chave3, node->PR3, node->P4);
 }
 
+// retorna caso esteja disponível à inserção comum dentro de um nó
 static int isAvailable(BTreeNode *node)
 {
     if (node->C3[0] != '$')
@@ -143,7 +146,7 @@ static int isAvailable(BTreeNode *node)
     return 1; // Texto não existe, é vazio, portanto ESTÁ disponível
 }
 
-/* Insere o valor de fato no local pedido */
+/* Insere o valor de fato no local pedido, só para o primeiro elemento da árvore */
 static void insertInPlace(BTreeNode *node, char *aux, int referenceRRN, int place)
 {
     switch (place)
@@ -212,6 +215,8 @@ static int stringHigherThen(char *a, char *b, int place)
     }
 }
 */
+
+//  função  de inserção comum seja no nó folha, intermediário, ou raíz no momento em que não há split e só inserção comum
 static void shiftRightImplement(BTreeNode *node, char *aux, int referenceRRN, int place)
 {
     switch (place)
@@ -254,6 +259,7 @@ static void shiftRightImplement(BTreeNode *node, char *aux, int referenceRRN, in
     }
 }
 
+//  Shifta os ponteiros em um splic comum sem promoção dupla
 static void shiftPointers(BTreeNode *dadoNode, BTreeNode *newRight, int place)
 {
     switch (place)
@@ -276,6 +282,7 @@ static void shiftPointers(BTreeNode *dadoNode, BTreeNode *newRight, int place)
     }
 }
 
+//  Shift específico de ponteiros utilizado no momento de split intermediário como o da raíz ou nó não folha
 static void shiftSplitPointers(BTreeNode *leftNode, BTreeNode *BottomRight, BTreeNode *topRight, int *pointers, int place)
 {
 
@@ -315,6 +322,7 @@ static void shiftSplitPointers(BTreeNode *leftNode, BTreeNode *BottomRight, BTre
     }
 }
 
+// Função que compara as chaves atuais de um nó com uma string e fala onde ela devia ficar
 int whereToInsert(BTreeNode *node, char *aux)
 {
     if (strcmp(aux, node->C1) < 0 || node->C1[0] == '$')
@@ -329,6 +337,7 @@ int whereToInsert(BTreeNode *node, char *aux)
         return -1;
 }
 
+// Função acessora para pegar as chaves atuais do nó e repassar para o nó acima
 char **promoteVector(BTreeNode *node, char **vector, char *aux)
 {
     int where = whereToInsert(node, aux);
@@ -370,6 +379,7 @@ char **promoteVector(BTreeNode *node, char **vector, char *aux)
     return vector;
 }
 
+//  Retorna o PRi de um nó específico
 int *priVector(BTreeNode *childNode, int *priPromoted, char *aux, int referenceRRN)
 {
     int where = whereToInsert(childNode, aux);
@@ -411,7 +421,7 @@ int *priVector(BTreeNode *childNode, int *priPromoted, char *aux, int referenceR
     return priPromoted;
 }
 
-// Insere o nó no arquivo na pos    ição em que estiver o arquivo de indice
+// Insere o nó no arquivo na posição em que estiver o arquivo de indice
 // PLACE == -1  para armazenar no final
 void updateBinArchive(FILE *bin_index, BTreeNode *node, int placeRRN)
 {
@@ -502,6 +512,7 @@ void updateBinArchive(FILE *bin_index, BTreeNode *node, int placeRRN)
     fflush(bin_index);
 }
 
+// Função acessora ao split carregando os ponteiros atuais
 int *promotePointers(BTreeNode *node, int pointers[])
 {
     pointers[0] = node->P1;
@@ -511,6 +522,7 @@ int *promotePointers(BTreeNode *node, int pointers[])
     return pointers;
 }
 
+// split comum no nó folha repassando o nó da direita e promovendo uma chave
 static BTreeNode *splitNode(FILE *bin_index, BTreeNode *childNode, BTreeNode *newRight, char *aux, int referenceRRN)
 {
     char **vector = (char **)malloc(4 * sizeof(char *));
@@ -578,6 +590,7 @@ int keysQuant(BTreeNode *node)
     }
 }
 
+//  Lê um registro genérico em um RRN dentro do dentro do arquivo de índice
 BTreeNode *readIndexRegister(FILE *bin_index, BTreeNode *prt_root, int RRN)
 {
 
@@ -643,6 +656,7 @@ BTreeNode *readIndexRegister(FILE *bin_index, BTreeNode *prt_root, int RRN)
     return prt_root;
 }
 
+// Retorna o nó raiz proveniete do cabeçalho
 BTreeNode *getRoot(FILE *bin_index, BTreeNode *root)
 {
     int rootNodeValue;
@@ -655,38 +669,6 @@ BTreeNode *getRoot(FILE *bin_index, BTreeNode *root)
     root = readIndexRegister(bin_index, root, rootNodeValue);
     return root;
 }
-
-/*
-BTreeNode *getRootBackup(FILE *bin_index, BTreeNode *root)
-{
-    int a, b, counter = 0;
-    do
-    {
-        counter++;
-        a = 1, b = 1;
-        int rootNodeValue;
-        char status;
-        rewind(bin_index);             // Rebobina o arquivo para o início
-        fseek(bin_index, 0, SEEK_SET); // Vai para o começo do arquivo
-        a = fread(&status, sizeof(char), 1, bin_index);
-        b = fread(&rootNodeValue, sizeof(int), 1, bin_index); // Lê a raiz
-        if (rootNodeValue == -1)
-            rootNodeValue = 0;
-        // if (a == 0 || b == 0)
-        // {
-        //     // perror("Error reading from file");
-        //     // fprintf(stderr, "errno: %d, strerror: %s\n", errno, strerror(errno));
-        //     printf("\t\n\n\natualizou o arquivo\t");
-        //     fclose(bin_index);
-        //     bin_index = fopen(outArchiveName, "rb+");
-        // }
-        // printf("fseek é:%d   |  status %d e rootNode é: %d\n", testeFSEEK, a, b);
-        root = readIndexRegister(bin_index, root, rootNodeValue);
-
-    } while (a != 1 || b != 1);
-    return root;
-}
-*/
 
 // Atualiza o header do arquivo  indice com as informações abaixo
 void updateHeader(FILE *bin_index, char status, int rootNodeRRN, int *nodeIndexRRN)
@@ -706,8 +688,7 @@ void updateHeader(FILE *bin_index, char status, int rootNodeRRN, int *nodeIndexR
     fflush(bin_index);
 }
 
-// Testa e insere o dado dentro do arquivo de index
-
+// Função acessora ao split intermediário - quando recebe uma chave promovida proveniente de um split abaixo e retorna uma nova promoção acima
 BTreeNode *intermediateSplit(FILE *bin_index, BTreeNode *root, BTreeNode *promotedNewRight, char **promoted, int *priPromoted, char *aux, int referenceRRN, int *nodeIndexRRN)
 {
     BTreeNode *newBottomRight = promotedNewRight; //  Inicializa o novo nó direito superior
@@ -738,6 +719,7 @@ BTreeNode *intermediateSplit(FILE *bin_index, BTreeNode *root, BTreeNode *promot
     return newTopperRight;
 }
 
+// Split especial usado para dar split no nó quando este for raíz, criando um nó direito e um novo nó raiz
 void newRootSplit(FILE *bin_index, BTreeNode *root, BTreeNode *promotedNewRight, char **promoted, int *priPromoted, char *aux, int referenceRRN, int *nodeIndexRRN)
 {
     BTreeNode *newRoot = initNode();              //  Inicializa a nova raiz
