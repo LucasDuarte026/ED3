@@ -18,7 +18,7 @@ void cleanKeyVector(char vector[])
 BTreeNode *initNode()
 {
     // Os ponteiros são inicializados apontando para -1,
-
+            
     BTreeNode *newNode = (BTreeNode *)malloc(sizeof(BTreeNode));
     newNode->alturaNo = -1;
     newNode->nroChavesNo = -1;
