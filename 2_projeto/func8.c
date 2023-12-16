@@ -43,11 +43,6 @@ void heapSort(Vertex *graph[], int n)
     }
 }
 
-void updateDegree(Vertex *v)
-{
-    v->degree = v->entrance + v->output;
-}
-
 Dados *getRegister(FILE *bin, Dados *dados)
 {
     fread(&dados->grupo, sizeof(int), 1, bin);
@@ -96,6 +91,7 @@ void addNewOrigin(Vertex *graph[], Dados *data, int originCounter)
 {
     Vertex *newVertex = initVertex();
     strcpy(newVertex->tecName, data->nomeTecnologiaOrigem.string);
+    newVertex->group = data->grupo;
     graph[originCounter] = newVertex;
 }
 
@@ -104,11 +100,11 @@ void insertRightward(Vertex *actualVertex, Dados *data)
     if (actualVertex->nextVertex == NULL)
     {
         Vertex *newDestinyVertex = initVertex();
-        strcpy(data->nomeTecnologiaDestino.string, newDestinyVertex->tecName);
+        strcpy(newDestinyVertex->tecName, data->nomeTecnologiaDestino.string);
         newDestinyVertex->weight = data->peso;
         actualVertex->nextVertex = newDestinyVertex;
     }
-    else if (strcmp(data->nomeTecnologiaDestino.string, actualVertex->tecName) > 0)
+    else if (strcmp(data->nomeTecnologiaDestino.string, actualVertex->nextVertex->tecName) < 0)
     {
 
         Vertex *newIntermediate = initVertex();
@@ -116,16 +112,6 @@ void insertRightward(Vertex *actualVertex, Dados *data)
         newIntermediate->nextVertex = actualVertex->nextVertex;
         newIntermediate->weight = data->peso;
         actualVertex->nextVertex = newIntermediate;
-    }
-    else if (strcmp(data->nomeTecnologiaDestino.string, actualVertex->nextVertex->tecName) < 0)
-    {
-        {
-            Vertex *newIntermediate = initVertex();
-            strcpy(newIntermediate->tecName, data->nomeTecnologiaDestino.string);
-            newIntermediate->nextVertex = actualVertex->nextVertex;
-            newIntermediate->weight = data->peso;
-            actualVertex->nextVertex = newIntermediate;
-        }
     }
     else
     {
@@ -166,7 +152,7 @@ void printFunc8(Vertex *graph[], int graph_size)
             do
             {
                 currentRight = currentRight->nextVertex;
-                printf("%s %d %d %d | ", graph[i]->tecName, graph[i]->group, graph[i]->entrance, graph[i]->output);
+                printf("%s %d %d %d %d ", graph[i]->tecName, graph[i]->group, graph[i]->entrance, graph[i]->output, graph[i]->degree);
                 printf("%s %d\n", currentRight->tecName, currentRight->weight);
 
             } while (currentRight->nextVertex != NULL);
@@ -178,7 +164,7 @@ void printGraph(Vertex *graph[], int graph_size)
 {
     for (int i = 0; i < graph_size; i++)
     {
-        printf("|%d||G|I|O||%d||%d||%d|\t|%s|", i, graph[i]->degree, graph[i]->entrance, graph[i]->output, graph[i]->tecName);
+        printf("|%d||G|I|O|D||%d||%d||%d||%d|\t|%s|", i, graph[i]->group, graph[i]->entrance, graph[i]->output, graph[i]->degree, graph[i]->tecName);
         Vertex *currentRight = graph[i]->nextVertex;
         if (currentRight)
         {
@@ -192,6 +178,59 @@ void printGraph(Vertex *graph[], int graph_size)
         }
         printf("\n");
     }
+}
+
+void countDegrees(Vertex *graph[], int graph_size)
+{
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    // out quant contador
+
+    for (int i = 0; i < graph_size; i++)
+    {
+        int outQuant = 0;
+
+        Vertex *currentRight = graph[i]->nextVertex;
+        if (currentRight)
+        {
+            do
+            {
+                outQuant++;
+                currentRight = currentRight->nextVertex;
+            } while (currentRight);
+        }
+        graph[i]->output = outQuant;
+    }
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    // Contar a quantidade de vertices que apontam para aquele vértice
+    for (int i = 0; i < graph_size; i++)
+    {
+
+        char *desiredSeek = graph[i]->tecName;
+
+        int inQuant = 0;
+        for (int j = 0; j < graph_size; j++)
+        {
+            if (i == j)
+                j++;
+            Vertex *currentRight = graph[j]->nextVertex;
+            if (currentRight)
+            {
+                do
+                {
+                    if (strcmp(desiredSeek, currentRight->tecName) == 0)
+                    {
+                        inQuant++;
+                    }
+                    currentRight = currentRight->nextVertex;
+                } while (currentRight);
+            }
+        }
+        graph[i]->entrance = inQuant;
+    }
+    // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+    // Contar o grau total do vértice
+    for (int i = 0; i < graph_size; i++)
+        graph[i]->degree = graph[i]->entrance + graph[i]->output;
 }
 
 // Funcionalidade principal chamada pela main para fazer a cração de uma Árvore de índice com base no bance de dados binário de tecnologias
@@ -261,15 +300,15 @@ void functionality_8(char *binArchiveName)
             }
             else
             {
-                printf("nulo");
+                // printf("nulo");
                 // referenceRRN++; //  Contador do registros de leitura do arquivo binário
                 // função acessora para debig
                 // printf("dados:\t|%d||%s||%d||%s||", dados.nomeTecnologiaOrigem.tamanho, dados.nomeTecnologiaOrigem.string, dados.nomeTecnologiaDestino.tamanho, dados.nomeTecnologiaDestino.string);
             }
 
-            printf("\n");
-            printGraph(graph, graph_size);
-            printf("\n");
+            // printf("\n");
+            // printGraph(graph, graph_size);
+            // printf("\n");
 
             free(dados.nomeTecnologiaOrigem.string); //  Libera as strings variaveis
             free(dados.nomeTecnologiaDestino.string);
@@ -286,8 +325,8 @@ void functionality_8(char *binArchiveName)
         printf("Falha no processamento do arquivo.\n");
     }
     heapSort(graph, graph_size);
-    printf("\n\n\tOrdenado:\n");
-    printGraph(graph, graph_size);
+    countDegrees(graph, graph_size);
+    // printGraph(graph, graph_size);
     printFunc8(graph, graph_size);
     fclose(bin);
 }
