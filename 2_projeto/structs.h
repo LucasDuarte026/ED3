@@ -7,9 +7,10 @@
 #include <stdlib.h>
 
 #define MAX_NAME_SIZE 55
-
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
-// -- -- -- -- -- -- -- -- -- -- -- -- Funcionalidades antigas - -- -- -- -- -- -- -- -- -- -- 
+#define MAX_ORIGINS_TECNOLOGIES 200
+#define EMPTY_CONTROL "$$$$$$"
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+// -- -- -- -- -- -- -- -- -- -- -- -- Funcionalidades antigas - -- -- -- -- -- -- -- -- -- --
 #define LIXO "$"
 #define TAM_CABECALHO 13
 #define TAM_REGISTRO_FIXO 21
@@ -44,16 +45,17 @@ typedef struct
     StringVariavel nomeTecnologiaDestino; // tamanho variável
 
 } Dados;
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-typedef struct
+typedef struct Vertex
 {
-    char *destName[MAX_NAME_SIZE];
-    int group;
-    int freedom;
+    char tecName[MAX_NAME_SIZE];
+    int entrance;
     int degree;
     int output;
-    Vertex *nextVertex;
+    int group;
+    int weight;
+    struct Vertex *nextVertex;
 } Vertex;
 
 #endif
