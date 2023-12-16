@@ -24,6 +24,7 @@
 #define REMOVIDO '1'
 #define NAO_REMOVIDO '0'
 #define NULO "NULO"
+extern char *outArchiveName;
 
 typedef struct
 { // 13 bytes em status e 4 bytes no resto

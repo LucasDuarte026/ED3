@@ -3,6 +3,8 @@
 #include "B-Tree.h"
 #include "func5.h"
 #include "func6.h"
+#include "func7.h"
+char *outArchiveName;
 
 int main()
 {
@@ -19,17 +21,15 @@ int main()
     char argumento_1[MAX_STRING_LENGTH];
     char argumento_2[MAX_STRING_LENGTH];
     char argumento_3[MAX_STRING_LENGTH];
-    char argumento_4[MAX_STRING_LENGTH];
     scanf("%c", &decision); // recebe a decisão
 
-    if (decision != '5' && decision != '6' && decision != '7' && decision != '8')
+    if (decision != '5' && decision != '6' && decision != '7')
     {
         printf("-> Erro de decisão\n"); // caso a escolha n seja válida
         return 1;
     }
 
     char *binRegName;
-    char *binArchiveName;
     int N;
     switch (decision)
     {
@@ -41,9 +41,9 @@ int main()
         scanf("%s", argumento_2);
         scanf("%s", argumento_3);
         binRegName = argumento_2;
-        binArchiveName = argumento_3;
+        outArchiveName = argumento_3;
 
-        functionality_5(binRegName, binArchiveName);
+        functionality_5(binRegName, outArchiveName);
 
         /*
         // teste para p1
@@ -159,11 +159,21 @@ int main()
         scanf("%s", argumento_2);
         scanf("%s", argumento_3);
         binRegName = argumento_1;
-        binArchiveName = argumento_2;
+        outArchiveName = argumento_2;
         N = atoi(argumento_3);
 
-        functionality_6(binRegName, binArchiveName, N);
+        functionality_6(binRegName, outArchiveName, N);
+        break;
     case '7':
+        scanf("%s", argumento_1);
+        scanf("%s", argumento_2);
+        scanf("%s", argumento_3);
+        binRegName = argumento_1;
+        outArchiveName = argumento_2;
+        N = atoi(argumento_3);
+
+        functionality_7(binRegName, outArchiveName, N);
+        break;
     case '8':
 
         break;
