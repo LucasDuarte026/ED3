@@ -1,5 +1,5 @@
-#include "func8.h"
 #include "structs.h"
+#include "func8.h"
 
 void swap(Vertex *a, Vertex *b)
 {
@@ -43,6 +43,7 @@ void heapSort(Vertex *graph[], int n)
     }
 }
 
+// Pegar um registro completo do arquivo binário
 Dados *getRegister(FILE *bin, Dados *dados)
 {
     fread(&dados->grupo, sizeof(int), 1, bin);
@@ -75,9 +76,9 @@ Vertex *initVertex()
     return newVertex;
 }
 
-int alreadyInserted(Vertex *graph[], char origin[], int size)
+int alreadyInserted(Vertex *graph[], char origin[], int graph_size)
 {
-    for (int i = 0; i < MAX_ORIGINS_TECNOLOGIES; i++)
+    for (int i = 0; i < graph_size; i++)
     {
         if (strcmp(graph[i]->tecName, origin) == 0)
         {
@@ -125,11 +126,11 @@ int updateGraph(Vertex *graph[], Dados *data, int graph_size)
     // if (graph == NULL)
     //     addNewOrigin(graph, data);
 
-    int place = alreadyInserted(graph, data->nomeTecnologiaOrigem.string, data->nomeTecnologiaOrigem.tamanho);
+    int place = alreadyInserted(graph, data->nomeTecnologiaOrigem.string, graph_size);
     if (place != -1)
     {
         // printf("place:   %d\n", place);
-        Vertex *newRight = initVertex();
+        // Vertex *newRight = initVertex();
         insertRightward(graph[place], data);
         return graph_size;
     }
@@ -211,18 +212,22 @@ void countDegrees(Vertex *graph[], int graph_size)
         for (int j = 0; j < graph_size; j++)
         {
             if (i == j)
+            {
                 j++;
-            Vertex *currentRight = graph[j]->nextVertex;
-            if (currentRight)
+                if (j >= graph_size)
+                    break;
+            }
+            Vertex *currentRight = graph[j];
+            if (currentRight->nextVertex)
             {
                 do
                 {
+                    currentRight = currentRight->nextVertex;
                     if (strcmp(desiredSeek, currentRight->tecName) == 0)
                     {
                         inQuant++;
                     }
-                    currentRight = currentRight->nextVertex;
-                } while (currentRight);
+                } while (currentRight->nextVertex != NULL);
             }
         }
         graph[i]->entrance = inQuant;

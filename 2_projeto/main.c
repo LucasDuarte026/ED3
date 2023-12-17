@@ -1,6 +1,8 @@
 
 #include "structs.h"
 #include "func8.h"
+#include "func9.h"
+#include "func10.h"
 char *outArchiveName;
 
 int main()
@@ -17,7 +19,7 @@ int main()
     char decision[MAX_STRING_LENGTH];
     char argumento_1[MAX_STRING_LENGTH];
     char argumento_2[MAX_STRING_LENGTH];
-    char argumento_3[MAX_STRING_LENGTH];
+    // char argumento_3[MAX_STRING_LENGTH];
     scanf("%s", decision); // recebe a decisão
 
     if (strcmp(decision, "8") != 0 && strcmp(decision, "9") != 0 && strcmp(decision, "10") != 0 && strcmp(decision, "11") != 0)
@@ -27,13 +29,31 @@ int main()
     }
 
     char *binRegName;
-    int N;
+    int n_quant;
     if (strcmp(decision, "8") == 0)
     {
         scanf("%s", argumento_1);
         binRegName = argumento_1;
 
         functionality_8(binRegName);
+    }
+    //  -- - -- -- - -- -- - -- -- - -- -- - -- -- - -- -- - -- -- - -- -- - --
+    if (strcmp(decision, "9") == 0)
+    {
+        scanf("%s", argumento_1);
+        binRegName = argumento_1;
+
+        functionality_9(binRegName);
+    }
+    //  -- - -- -- - -- -- - -- -- - -- -- - -- -- - -- -- - -- -- - -- -- - --
+    if (strcmp(decision, "10") == 0)
+    {
+        scanf("%s", argumento_1);
+        scanf("%s", argumento_2);
+        binRegName = argumento_1;
+        n_quant = atoi(argumento_2);
+
+        functionality_10(binRegName, &n_quant);
     }
     //  -- - -- -- - -- -- - -- -- - -- -- - -- -- - -- -- - -- -- - -- -- - --
 
