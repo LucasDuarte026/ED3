@@ -2,6 +2,8 @@
 #include "func1.h"
 #include "func8.h"
 
+
+//  Vê se uma string está dentro do vetor, retorna 1 para sim, 0 para não.
 int inVector(char *string, char *alreadySeen[], int alreadySeen_size)
 {
     for (int i = 0; i < alreadySeen_size; i++)
@@ -14,6 +16,7 @@ int inVector(char *string, char *alreadySeen[], int alreadySeen_size)
     return 0;
 }
 
+// função que de fato mede a distância 
 int searchDestiny(Vertex *graph[], char *origin, char *destiny, int graph_size, char *alreadySeen[], int alreadySeen_size)
 {
     int totalWeight = 0;
@@ -51,6 +54,8 @@ int searchDestiny(Vertex *graph[], char *origin, char *destiny, int graph_size, 
     }
     return totalWeight;
 }
+
+//  Função acessora que prepara a busca dos n pedidos
 void measureDistance(Vertex *graph[], int graph_size, int n)
 {
 
@@ -68,6 +73,7 @@ void measureDistance(Vertex *graph[], int graph_size, int n)
     }
 }
 
+// Funcionalidade principal, que abre o binário e puxa a busca do caminho de dos vértices de A para B
 void functionality_12(char *binArchiveName, int n)
 {
 

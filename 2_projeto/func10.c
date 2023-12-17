@@ -4,6 +4,7 @@
 #include "func8.h"
 #include "func1.h"
 
+//  Função que procura uma tecnologia dentro do grafo
 int seekTechnology(Vertex *graph[], int graph_size, char *seekTec)
 {
     int found = 0;
@@ -36,6 +37,7 @@ int seekTechnology(Vertex *graph[], int graph_size, char *seekTec)
     return found;
 }
 
+// função acessora usada para busca da tecnologia
 void showConnections(Vertex *graph[], int graph_size, int N)
 {
     for (int i = 0; i < N; i++)
@@ -52,6 +54,7 @@ void showConnections(Vertex *graph[], int graph_size, int N)
     }
 }
 
+//  Função principal usada para procura de uma origem específica com seus respectivos vértices vizinhos
 void functionality_10(char *binArchiveName, int *n)
 {
     int n_quant = *n;
