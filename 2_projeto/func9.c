@@ -2,6 +2,7 @@
 #include "func8.h"
 #include "func9.h"
 
+// Utilizado anteriormente mas readaptado para o grafo transposto
 void addNewOrigin_T(Vertex *graph_T[], char *text, int group, int graph_size_T)
 {
     Vertex *newVertex = initVertex();
@@ -10,6 +11,7 @@ void addNewOrigin_T(Vertex *graph_T[], char *text, int group, int graph_size_T)
     graph_T[graph_size_T] = newVertex;
 }
 
+// Utilizado anteriormente mas readaptado para o grafo transposto
 void insertRightward_T(Vertex *actualVertex, char *text, int weight)
 {
     if (actualVertex->nextVertex == NULL)
@@ -34,6 +36,7 @@ void insertRightward_T(Vertex *actualVertex, char *text, int weight)
     }
 }
 
+// Utilizado anteriormente mas readaptado para o grafo transposto
 int updateGraph_T(Vertex *graph_T[], char *origin, char *destiny, int weight, int group, int graph_size_T)
 {
     int place = alreadyInserted(graph_T, destiny, graph_size_T);
@@ -52,6 +55,7 @@ int updateGraph_T(Vertex *graph_T[], char *origin, char *destiny, int weight, in
     }
 }
 
+// Vê se já foi inserido no grafo_T
 int alreadyTranposed(char *string, char *vectorTecnologies[], int vector_size)
 {
     for (int i = 0; i < vector_size; i++)
@@ -62,58 +66,7 @@ int alreadyTranposed(char *string, char *vectorTecnologies[], int vector_size)
     return 0;
 }
 
-// int transposeGraphOLD(Vertex *graph[], Vertex *graph_T[], int graph_size, int graph_size_T)
-// {
-//     char *vectorTecnologies[MAX_ORIGINS_TECNOLOGIES];
-//     int vectorCounter = 0;
-//     for (int i = 0; i < MAX_ORIGINS_TECNOLOGIES; i++)
-//     {
-//         vectorTecnologies[i] = "$$$$$$";
-//     }
-
-//     // for (int i = 0; i < graph_size; i++)
-//     // {
-//     Vertex *currentRight;
-//     currentRight = graph[0];
-//     // do
-//     // {
-//     if (currentRight->nextVertex)
-//     {
-//         if (!alreadyTranposed(currentRight->nextVertex->tecName, vectorTecnologies, vectorCounter))
-//         {
-//             for (int j = 0; j < graph_size; j++)
-//             {
-//                 // if (j == i)
-//                 //     j++;
-
-//                 Vertex *second_currentRight;
-//                 second_currentRight = graph[j];
-//                 do
-//                 {
-//                     if (second_currentRight->nextVertex)
-//                     {
-//                         // graph_T[graph_size_T] = second_currentRight->nextVertex->tecName;
-//                         graph_size_T = updateGraph_T(graph_T, graph[j]->tecName, second_currentRight->nextVertex->tecName,second_currentRight->nextVertex->weight, graph[j]->group, graph_size_T);
-
-//                         second_currentRight = second_currentRight->nextVertex;
-//                     }
-//                 } while (second_currentRight->nextVertex != NULL);
-
-//                 vectorTecnologies[vectorCounter] = strdup(currentRight->tecName);
-//                 vectorCounter++;
-//                 // printf("\n");
-//                 // printGraph(graph_T, graph_size_T);
-//                 // printf("\n");
-//             }
-//         }
-
-//         currentRight = currentRight->nextVertex;
-//     }
-//     return graph_size_T;
-//     //     } while (currentRight->nextVertex != NULL);
-//     // }
-// }
-
+// Funcção que recebe um grafo e retorna seu transposto
 int transposeGraph(Vertex *graph[], Vertex *graph_T[], int graph_size, int graph_size_T)
 {
     char *vectorTecnologies[MAX_ORIGINS_TECNOLOGIES];
@@ -175,6 +128,7 @@ int transposeGraph(Vertex *graph[], Vertex *graph_T[], int graph_size, int graph
     // }
 }
 
+// função geral que abre o binário, escreve completamente o o grafo e mostra-o
 void functionality_9(char *binArchiveName)
 {
 

@@ -1,81 +1,82 @@
-<<<<<<< HEAD
-#include "func10.h"
 #include "structs.h"
-#include <stdio.h>
-#include <stdbool.h>
-
-void functionality_10(char *binArchiveName, int n) {
-    FILE *bin = fopen(binArchiveName, "rb");
-    if (bin == NULL) {
-        printf("Falha no processamento do arquivo.\n");
-        return;
-    }
-
-    // Lê o cabeçalho para posicionar devidamente a cabeça leitora para o primeiro RRN
-    Cabecalho cabecalho;
-
-    if (cabecalho.status == '0') {
-=======
-#include "structs.h"
-#include "func10.h"
-#include "func9.h"
-#include "func8.h"
 #include "func1.h"
+#include "func8.h"
 
-//  Função que procura uma tecnologia dentro do grafo
-int seekTechnology(Vertex *graph[], int graph_size, char *seekTec)
+
+//  Vê se uma string está dentro do vetor, retorna 1 para sim, 0 para não.
+int inVector(char *string, char *alreadySeen[], int alreadySeen_size)
 {
-    int found = 0;
+    for (int i = 0; i < alreadySeen_size; i++)
+    {
+        if (strcmp(alreadySeen[i], string) == 0)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// função que de fato mede a distância 
+int searchDestiny(Vertex *graph[], char *origin, char *destiny, int graph_size, char *alreadySeen[], int alreadySeen_size)
+{
+    int totalWeight = 0;
+    Vertex *currentRight;
     for (int i = 0; i < graph_size; i++)
     {
-        if (strcmp(seekTec, graph[i]->tecName) == 0)
+        if (strcmp(origin, graph[i]->tecName) == 0)
         {
-            found = 1;
-            printf("%s: ", graph[i]->tecName);
-            Vertex *currentRight;
             currentRight = graph[i];
-            if (currentRight->nextVertex)
-            {
-                do
-                {
-                    currentRight = currentRight->nextVertex;
-                    if (currentRight->nextVertex == NULL)
-                    {
-                        printf("%s", currentRight->tecName);
-                    }
-                    else
-                        printf("%s, ", currentRight->tecName);
-
-                } while (currentRight->nextVertex != NULL);
-            }
-            printf("\n\n");
             break;
         }
     }
-    return found;
+    alreadySeen[alreadySeen_size] = strdup(currentRight->tecName);
+    alreadySeen_size++;
+
+    if (currentRight->nextVertex)
+    {
+        do
+        {
+            currentRight = currentRight->nextVertex;
+            if (currentRight->nextVertex)
+            {
+                if (strcmp(currentRight->tecName, destiny) == 0)
+                {
+
+                    return totalWeight + currentRight->weight;
+                    break;
+                }
+                else if (!inVector(currentRight->tecName, alreadySeen, alreadySeen_size))
+                {
+                    return searchDestiny(graph, currentRight->nextVertex->tecName, destiny, graph_size, alreadySeen, alreadySeen_size);
+                }
+            }
+        } while (currentRight->nextVertex != NULL);
+    }
+    return totalWeight;
 }
 
-// função acessora usada para busca da tecnologia
-void showConnections(Vertex *graph[], int graph_size, int N)
+//  Função acessora que prepara a busca dos n pedidos
+void measureDistance(Vertex *graph[], int graph_size, int n)
 {
-    for (int i = 0; i < N; i++)
-    {
-        char seekTec[55];
-        scan_quote_string(seekTec);
-        // printf("%s\n", seekTec);
 
-        int found = seekTechnology(graph, graph_size, seekTec);
-        if (!found)
-        { // registro inexistente
-            printf("Registro inexistente.\n");
-        }
+    for (int i = 0; i < n; i++)
+    {
+        char origin[MAX_NAME_SIZE];
+        char destiny[MAX_NAME_SIZE];
+        scan_quote_string(origin);
+        scan_quote_string(destiny);
+        char *alreadySeen[200];
+        int alreadySeen_size = 0;
+        int weight_size = searchDestiny(graph, origin, destiny, graph_size, alreadySeen, alreadySeen_size);
+        printf("\n\n Tamanho da distância é: %d", weight_size);
+        fflush(stdout);
     }
 }
 
-//  Função principal usada para procura de uma origem específica com seus respectivos vértices vizinhos
-void functionality_10(char *binArchiveName, int *n)
+// Funcionalidade principal, que abre o binário e puxa a busca do caminho de dos vértices de A para B
+void functionality_12(char *binArchiveName, int n)
 {
-    int n_quant = *n;
+
     /*
      *   Inicialização bem semelhante as outras funcionalidades
      *   Abre o arquivo binário, lê o cabeçalho para posicionar devidamente a cabeça leitora para o primeiro RRN
@@ -97,52 +98,11 @@ void functionality_10(char *binArchiveName, int *n)
 
     if (cabecalho.status == '0')
     {
->>>>>>> origin/develop
         printf("Falha no processamento do arquivo.\n");
         fclose(bin);
         return;
     }
 
-<<<<<<< HEAD
-    for (int i = 0; i < n; i++) {
-        char nomeTecnologia[MAX_NAME_SIZE];
-        printf("Digite o nome da tecnologia destino: ");
-        scanf(" \"%[^\"]\"", nomeTecnologia); // Le as tecnologias com espaco
-
-        printf("%s:", nomeTecnologia);
-        listOriginTechnologies(bin, nomeTecnologia);
-        printf("\n");
-    }
-
-    fclose(bin);
-}
-
-void listOriginTechnologies(FILE *bin, char *destTechName) {
-    fseek(bin, TAM_CABECALHO, SEEK_SET); // Pula o cabeçalho
-
-    Dados dados;
-    bool isFirst = true;
-
-    while (fread(&dados.removido, sizeof(char), 1, bin)) {
-        if (dados.removido == '0') {
-            dados = *getRegister(bin, &dados); //verificar aqui
-
-            if (strcmp(dados.nomeTecnologiaDestino.string, destTechName) == 0) {
-                if (!isFirst) {
-                    printf(", ");
-                }
-                printf("%s", dados.nomeTecnologiaOrigem.string);
-                isFirst = false;
-            }
-
-            free(dados.nomeTecnologiaOrigem.string);
-            free(dados.nomeTecnologiaDestino.string);
-        } else {
-            fseek(bin, TAM_REGISTRO - 1, SEEK_CUR); // Skip removed record
-        }
-    }
-}
-=======
     //  inicializa o cabeçalho do arquivo de indice
 
     Dados dados;
@@ -150,8 +110,7 @@ void listOriginTechnologies(FILE *bin, char *destTechName) {
     Vertex *graph[MAX_ORIGINS_TECNOLOGIES]; // inicializa com o máximo possível de origens. Nunca ultrapassará 200
     char *auxInit = EMPTY_CONTROL;
     int graph_size = 0;
-    int graph_size_T = 0;
-    
+
     for (int i = 0; i < MAX_ORIGINS_TECNOLOGIES; i++)
     {
         graph[i] = initVertex();
@@ -201,13 +160,8 @@ void listOriginTechnologies(FILE *bin, char *destTechName) {
     }
 
     heapSort(graph, graph_size);
-
-    Vertex *graph_T[graph_size]; // inicializa com o máximo possível de origens. Nunca ultrapassará 200
-    graph_size_T = transposeGraph(graph, graph_T, graph_size, graph_size_T);
-    heapSort(graph_T, graph_size_T);
-    countDegrees(graph_T, graph_size_T);
+    countDegrees(graph, graph_size);
+    measureDistance(graph, graph_size, n);
     // printFunc8(graph_T, graph_size_T);
-    showConnections(graph_T, graph_size_T, n_quant);
     fclose(bin);
 }
->>>>>>> origin/develop
