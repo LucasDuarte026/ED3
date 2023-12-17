@@ -1,0 +1,8 @@
+{
+    "C_Cpp.errorSquiggles": "disabled",
+    "files.associations": {
+        "func10.h": "c",
+        "vector": "c",
+        "stack.h": "c"
+    }
+}

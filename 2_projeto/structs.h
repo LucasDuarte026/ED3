@@ -58,4 +58,11 @@ typedef struct Vertex
     struct Vertex *nextVertex;
 } Vertex;
 
+typedef struct {
+    int top;
+    unsigned capacity;
+    int* array;
+} Stack;
+
+
 #endif

@@ -1,51 +1,65 @@
-#include "func11.h"
 #include "structs.h"
+#include "func8.h"
 #include "func9.h"
+#include "func10.h"
+#include "func11.h"
+#include "stack.h"
 
-//void DFS(Vertex *graph[], bool visited[], int v, Stack *stack) {
-//}
+void DFS(Vertex *graph[], bool visited[], int v, Stack *stack) {
+    visited[v] = true;
+    Vertex *current = graph[v]->nextVertex;
+    while (current != NULL) {
+        if (!visited[current->index]) {
+            DFS(graph, visited, current->index, stack);
+        }
+        current = current->nextVertex;
+    }
+    if (stack != NULL) {
+        push(stack, v);
+    }
+}
 
-//void fillOrder(Vertex *graph[], int v, bool visited[], Stack *stack) {
-//}
+void fillOrder(Vertex *graph[], int graph_size, Stack *stack, bool visited[]) {
+    for (int i = 0; i < graph_size; i++) {
+        if (!visited[i]) {
+            DFS(graph, visited, i, stack);
+        }
+    }
+}
 
-//Vertex **transposeGraph(Vertex *graph[], int n) {}
+int countSCCs(Vertex *graph_T[], int graph_size, Stack *stack) {
+    bool *visited = (bool *)malloc(graph_size * sizeof(bool));
+    memset(visited, 0, graph_size * sizeof(bool));
 
-int countSCCs(Vertex *graph[], int n) {
-    Stack *stack = createStack(n);
-
-    // Mark all vertices as not visited
-    bool *visited = (bool *)malloc(n * sizeof(bool));
-    memset(visited, 0, n * sizeof(bool));
-
-    for (int i = 0; i < n; i++)
-        if (!visited[i])
-            fillOrder(graph, i, visited, stack);
-
-    Vertex **transposedGraph = transposeGraph(graph, n);
-
-    memset(visited, 0, n * sizeof(bool));
-
-    int count = 0;
+    int numSCCs = 0;
     while (!isStackEmpty(stack)) {
         int v = pop(stack);
-
         if (!visited[v]) {
-            DFS(transposedGraph, visited, v, NULL);
-            count++;
+            DFS(graph_T, visited, v, NULL);
+            numSCCs++;
         }
     }
 
     free(visited);
-    freeStack(stack);
-    freeGraph(transposedGraph, n);
-    return count;
+    return numSCCs;
 }
 
 void functionality_11(char *binArchiveName) {
-    Vertex *graph[MAX_ORIGINS_TECNOLOGIES];
-    int graph_size = readGraphFromBin(binArchiveName, graph);
+    Vertex *graph[MAX_ORIGINS_TECNOLOGIES], *graph_T[MAX_ORIGINS_TECNOLOGIES];
+    int graph_size = 0, graph_size_T = 0;
 
-    int numSCCs = countSCCs(graph, graph_size);
+    functionality_8(binArchiveName, graph, &graph_size);
+    functionality_9(binArchiveName, graph, graph_T, &graph_size, &graph_size_T);
+
+    Stack *stack = createStack(graph_size);
+    bool *visited = (bool *)malloc(graph_size * sizeof(bool));
+    memset(visited, 0, graph_size * sizeof(bool));
+
+    fillOrder(graph, graph_size, stack, visited);
+    int numSCCs = countSCCs(graph_T, graph_size, stack);
+
+    free(visited);
+    freeStack(stack);
 
     if (numSCCs == 1) {
         printf("Sim, o grafo e fortemente conexo e possui 1 componente.\n");
@@ -53,3 +67,4 @@ void functionality_11(char *binArchiveName) {
         printf("Nao, o grafo nao e fortemente conexo e possui %d componentes.\n", numSCCs);
     }
 }
+
