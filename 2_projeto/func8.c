@@ -1,7 +1,7 @@
 #include "structs.h"
 #include "func8.h"
 
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 // Bloco do HeapSort usado para ordenar o vetor de tecnologias origem
 void swap(Vertex *a, Vertex *b)
 {
@@ -44,7 +44,7 @@ void heapSort(Vertex *graph[], int n)
         heapify(graph, i, 0);
     }
 }
-// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 // Pegar um registro completo do arquivo binário
 Dados *getRegister(FILE *bin, Dados *dados)
@@ -182,7 +182,7 @@ void printGraph(Vertex *graph[], int graph_size)
             int aux = 0;
             do
             {
-                printf("\t%d->%s", aux++, currentRight->tecName);
+                printf("\t%d->%s (%d)", aux++, currentRight->tecName, currentRight->weight);
                 fflush(stdout);
                 currentRight = currentRight->nextVertex;
             } while (currentRight);

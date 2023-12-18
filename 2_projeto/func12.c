@@ -2,7 +2,6 @@
 #include "func1.h"
 #include "func8.h"
 
-
 //  Vê se uma string está dentro do vetor, retorna 1 para sim, 0 para não.
 int inVector(char *string, char *alreadySeen[], int alreadySeen_size)
 {
@@ -16,7 +15,7 @@ int inVector(char *string, char *alreadySeen[], int alreadySeen_size)
     return 0;
 }
 
-// função que de fato mede a distância 
+// função que de fato mede a distância .
 int searchDestiny(Vertex *graph[], char *origin, char *destiny, int graph_size, char *alreadySeen[], int alreadySeen_size)
 {
     int totalWeight = 0;
@@ -42,20 +41,28 @@ int searchDestiny(Vertex *graph[], char *origin, char *destiny, int graph_size, 
                 if (strcmp(currentRight->tecName, destiny) == 0)
                 {
 
-                    return totalWeight + currentRight->weight;
+                    return currentRight->weight;
                     break;
                 }
                 else if (!inVector(currentRight->tecName, alreadySeen, alreadySeen_size))
                 {
-                    return searchDestiny(graph, currentRight->nextVertex->tecName, destiny, graph_size, alreadySeen, alreadySeen_size);
+                    int intermediate = searchDestiny(graph, currentRight->tecName, destiny, graph_size, alreadySeen, alreadySeen_size);
+                    if (intermediate < 0)
+                    {
+                        return 0;
+                    }
+                    else
+                        return currentRight->weight + intermediate;
                 }
             }
+            else
+                return -1;
         } while (currentRight->nextVertex != NULL);
     }
     return totalWeight;
 }
 
-//  Função acessora que prepara a busca dos n pedidos
+//  Função acessora que prepara a busca dos n pedidos.
 void measureDistance(Vertex *graph[], int graph_size, int n)
 {
 
@@ -68,12 +75,16 @@ void measureDistance(Vertex *graph[], int graph_size, int n)
         char *alreadySeen[200];
         int alreadySeen_size = 0;
         int weight_size = searchDestiny(graph, origin, destiny, graph_size, alreadySeen, alreadySeen_size);
-        printf("\n\n Tamanho da distância é: %d", weight_size);
+        printf("%s %s: ", origin, destiny);
+        if (weight_size == -1)
+            printf("CAMINHO INEXISTENTE\n");
+        else
+            printf("%d\n", weight_size);
         fflush(stdout);
     }
 }
 
-// Funcionalidade principal, que abre o binário e puxa a busca do caminho de dos vértices de A para B
+// Funcionalidade principal, que abre o binário e puxa a busca do caminho de dos vértices de A para B.
 void functionality_12(char *binArchiveName, int n)
 {
 
