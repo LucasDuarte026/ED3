@@ -1,6 +1,8 @@
-#include "func8.h"
 #include "structs.h"
+#include "func8.h"
 
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+// Bloco do HeapSort usado para ordenar o vetor de tecnologias origem
 void swap(Vertex *a, Vertex *b)
 {
     Vertex temp = *a;
@@ -42,7 +44,9 @@ void heapSort(Vertex *graph[], int n)
         heapify(graph, i, 0);
     }
 }
+// -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
+// Pegar um registro completo do arquivo binário
 Dados *getRegister(FILE *bin, Dados *dados)
 {
     fread(&dados->grupo, sizeof(int), 1, bin);
@@ -62,6 +66,7 @@ Dados *getRegister(FILE *bin, Dados *dados)
     return dados;
 }
 
+//  Inicializar um vértice genérico, alocando-o dinamicamente
 Vertex *initVertex()
 {
     Vertex *newVertex = (Vertex *)malloc(sizeof(Vertex));
@@ -75,9 +80,10 @@ Vertex *initVertex()
     return newVertex;
 }
 
-int alreadyInserted(Vertex *graph[], char origin[], int size)
+// Testa caso uma nova origem seja já inserida no grafo, não precisando ser colocada novamente
+int alreadyInserted(Vertex *graph[], char origin[], int graph_size)
 {
-    for (int i = 0; i < MAX_ORIGINS_TECNOLOGIES; i++)
+    for (int i = 0; i < graph_size; i++)
     {
         if (strcmp(graph[i]->tecName, origin) == 0)
         {
@@ -87,6 +93,7 @@ int alreadyInserted(Vertex *graph[], char origin[], int size)
     return -1;
 }
 
+// Adiciona uma origem no vetor do grafo
 void addNewOrigin(Vertex *graph[], Dados *data, int originCounter)
 {
     Vertex *newVertex = initVertex();
@@ -95,6 +102,7 @@ void addNewOrigin(Vertex *graph[], Dados *data, int originCounter)
     graph[originCounter] = newVertex;
 }
 
+// Adiciona um destino na lista encadeada de forma ordenada
 void insertRightward(Vertex *actualVertex, Dados *data)
 {
     if (actualVertex->nextVertex == NULL)
@@ -119,17 +127,18 @@ void insertRightward(Vertex *actualVertex, Dados *data)
     }
 }
 
+// função geral que atualiza o grafo com um novo dado pego do arquivo binário
 int updateGraph(Vertex *graph[], Dados *data, int graph_size)
 {
     // Vertex *graph = *graph_aux;
     // if (graph == NULL)
     //     addNewOrigin(graph, data);
 
-    int place = alreadyInserted(graph, data->nomeTecnologiaOrigem.string, data->nomeTecnologiaOrigem.tamanho);
+    int place = alreadyInserted(graph, data->nomeTecnologiaOrigem.string, graph_size);
     if (place != -1)
     {
-        // printf("place:   %d\n", place);
-        Vertex *newRight = initVertex();
+        // printf("place:   %d\n", place);  // Usado para debug
+        // Vertex *newRight = initVertex();
         insertRightward(graph[place], data);
         return graph_size;
     }
@@ -141,6 +150,7 @@ int updateGraph(Vertex *graph[], Dados *data, int graph_size)
     }
 }
 
+// Funcionalidade exclusiva da funcionalidade 8 que mostra todo o grafo com as origens e os destinos em pares
 void printFunc8(Vertex *graph[], int graph_size)
 {
     for (int i = 0; i < graph_size; i++)
@@ -160,6 +170,7 @@ void printFunc8(Vertex *graph[], int graph_size)
     }
 }
 
+// Função local para printar o grafo origem e todos seus filhos
 void printGraph(Vertex *graph[], int graph_size)
 {
     for (int i = 0; i < graph_size; i++)
@@ -171,7 +182,7 @@ void printGraph(Vertex *graph[], int graph_size)
             int aux = 0;
             do
             {
-                printf("\t%d->%s", aux++, currentRight->tecName);
+                printf("\t%d->%s (%d)", aux++, currentRight->tecName, currentRight->weight);
                 fflush(stdout);
                 currentRight = currentRight->nextVertex;
             } while (currentRight);
@@ -180,6 +191,7 @@ void printGraph(Vertex *graph[], int graph_size)
     }
 }
 
+// função completa para atualizar os graus de entrada, saida e geral de um vértice
 void countDegrees(Vertex *graph[], int graph_size)
 {
     // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
@@ -211,18 +223,22 @@ void countDegrees(Vertex *graph[], int graph_size)
         for (int j = 0; j < graph_size; j++)
         {
             if (i == j)
+            {
                 j++;
-            Vertex *currentRight = graph[j]->nextVertex;
-            if (currentRight)
+                if (j >= graph_size)
+                    break;
+            }
+            Vertex *currentRight = graph[j];
+            if (currentRight->nextVertex)
             {
                 do
                 {
+                    currentRight = currentRight->nextVertex;
                     if (strcmp(desiredSeek, currentRight->tecName) == 0)
                     {
                         inQuant++;
                     }
-                    currentRight = currentRight->nextVertex;
-                } while (currentRight);
+                } while (currentRight->nextVertex != NULL);
             }
         }
         graph[i]->entrance = inQuant;
